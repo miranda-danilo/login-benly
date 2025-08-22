@@ -21,26 +21,26 @@ export function setupRegistrationForm() {
 
             const email = $signupForm["signup-email"].value;
             const password = $signupForm["signup-password"].value;
-            
+
             try {
                 // Crea el usuario con email y contraseña
                 const response = await createUserWithEmailAndPassword(auth, email, password);
-                
-                // Envía un email de verificación al usuario recién creado
-                await sendEmailVerification(auth.currentUser);
 
                 // Cierra el modal y reinicia el formulario en caso de éxito
                 $signupModal.close();
                 $signupForm.reset();
-                
-              
-                
+
+
+                // Envía un email de verificación al usuario recién creado
+                await sendEmailVerification(auth.currentUser);
+
+
                 // Muestra un mensaje de éxito al usuario
                 showMessage("LINK DE VERIFICACIÓN ENVIADO A SU CORREO");
 
-                
 
-              
+
+
 
 
             } catch (error) {

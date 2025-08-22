@@ -26,11 +26,14 @@ const getHTML = async (options) => {
 };
 
 // Referencias a elementos del DOM
-const mainContent = document.querySelector("main");
+/* const mainContent = document.querySelector("main"); */
+const mainContent = document.getElementById("main");
 const loginLink = document.getElementById("login-link");
 const registerLink = document.getElementById("register-link");
 const logoutLink = document.getElementById("logout-link");
 const headerNav = document.querySelector(".header__nav");
+const header = document.querySelector(".header");
+const footer = document.querySelector(".footer");
 
 // Referencias a los modales de la página principal
 const loginModal = document.getElementById('signin-modal');
@@ -74,6 +77,8 @@ export const updateUI = async (user) => {
         registerLink.classList.add("d-none");
         logoutLink.classList.remove("d-none");
         headerNav.classList.add("d-none");
+        footer.classList.add("d-none");
+     /*    header.classList.add("d-none"); */
 
         // Determina el rol y carga el contenido del panel
         const role = await fetchUserRole(user.uid);
@@ -114,6 +119,8 @@ export const updateUI = async (user) => {
         registerLink.classList.remove("d-none");
         logoutLink.classList.add("d-none");
         headerNav.classList.remove("d-none");
+        footer.classList.remove("d-none");
+     /*      header.classList.remove("d-none"); */
 
 
         // Carga la página de inicio

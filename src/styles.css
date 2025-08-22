@@ -200,6 +200,7 @@ background-color: transparent;
 .main {
   overflow: hidden;
   min-height: 100dvh;
+  height: auto;
    
 }
 

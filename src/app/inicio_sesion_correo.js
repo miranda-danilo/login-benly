@@ -24,6 +24,8 @@ export function setupSignInForm() {
                 // Inicia sesión con email y contraseña
                 const response = await signInWithEmailAndPassword(auth, email, password);
 
+                $signinModal.close();
+                $signinForm.reset();
 
                 // --- ⚠️ Lógica agregada para la verificación de correo ---
                 if (!response.user.emailVerified) {
@@ -57,7 +59,7 @@ export function setupSignInForm() {
                 });
 
 
-                 $signinModal.close();
+               /*   $signinModal.close(); */
 
 
                 // Muestra un mensaje de éxito
@@ -76,7 +78,7 @@ export function setupSignInForm() {
                 } */
 
                 // Limpia el formulario
-                $signinForm.reset();
+               /*  $signinForm.reset(); */
 
             } catch (error) {
                 const errorCode = error.code;

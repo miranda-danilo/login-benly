@@ -1,36 +1,96 @@
-<!-- Panel para usuarios normales (Estudiantes) -->
-<section id="user-panel">
-    <style>
-        /* Estilos para el spinner de carga */
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Estudiante</title>
+    <!-- Enlace a la fuente Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Enlace a tu nuevo archivo de estilos CSS -->
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="cuerpo">
 
-        .spinner-border {
-            width: 2rem;
-            height: 2rem;
-            border: 0.25em solid currentColor;
-            border-right-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.75s linear infinite;
-        }
-    </style>
-    <!-- Encabezado del perfil -->
-    <div class="flex items-center space-x-4 mb-8 p-4 bg-white rounded-lg shadow-md border-b-4 border-green-500">
-        <img id="user-photo" class="w-20 h-20 rounded-full object-cover border-4 border-green-500"
-            alt="Foto de perfil">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-900">¡Hola, <span id="user-email">Estudiante</span>!</h1>
-            <p class="text-md text-gray-500">Tu rol es: <span id="user-role" class="font-bold"></span></p>
-            <p class="text-sm text-gray-600">Bienvenido a tu herramienta de aprendizaje de inglés A1.</p>
+<div class="contenedor">
+
+    <!-- Barra lateral -->
+    <aside class="barra-lateral">
+        <div class="barra-lateral__encabezado">
+            <svg class="barra-lateral__icono" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.433 9.458 5 8 5c-3.141 0-5.707 2.05-5.707 4.79S4.859 14.58 8 14.58c1.458 0 2.832-.433 4-1.253m0 1.253v13m0-13C13.168 5.433 14.542 5 16 5c3.141 0 5.707 2.05 5.707 4.79S19.141 14.58 16 14.58c-1.458 0-2.832-.433-4-1.253"></path></svg>
+            <h2 class="barra-lateral__titulo">English A1</h2>
         </div>
-    </div>
+        
+        <nav class="barra-lateral__nav">
+            <ul id="unit-list" class="lista-unidades">
+                <!-- Los enlaces de las unidades se cargarán dinámicamente aquí -->
+            </ul>
+        </nav>
+        <button id="logout-btn" class="boton-cerrar-sesion">
+            Cerrar Sesión
+        </button>
+    </aside>
 
-    <!-- Contenido del panel de usuario... -->
-    <button id="logout-btn"
-        class="mt-8 w-full sm:w-auto bg-red-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 transition duration-300">
-        Cerrar Sesión
-    </button>
-</section>
+    <!-- Contenido Principal -->
+    <main class="contenido-principal">
+        <!-- El panel del usuario se mostrará primero -->
+        <section id="user-panel" class="panel-usuario">
+            <div class="panel-usuario__tarjeta">
+                <img id="user-photo" class="panel-usuario__foto" alt="Foto de perfil">
+                <div class="panel-usuario__info">
+                    <h1 class="panel-usuario__titulo">¡Hola, <span id="user-email">Estudiante</span>!</h1>
+                    <p class="panel-usuario__texto">Tu rol es: <span id="user-role" class="panel-usuario__rol"></span></p>
+                    <p class="panel-usuario__texto panel-usuario__texto--pequeño">Bienvenido a tu herramienta de aprendizaje de inglés A1.</p>
+                </div>
+            </div>
+            <div id="main-content" class="seccion-contenido">
+                <h1 class="seccion-contenido__titulo">Selecciona una unidad</h1>
+                <p class="seccion-contenido__subtitulo">Usa el menú lateral para comenzar a aprender y practicar.</p>
+                <div class="seccion-contenido__ilustracion">
+                    <svg class="seccion-contenido__ilustracion-icono" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- Secciones de Contenido de las Unidades (ocultas por defecto) -->
+        <section id="unit-UT1" class="seccion-unidad seccion-unidad--oculta">
+            <!-- Contenido de la Unidad -->
+            <div class="tarjeta-unidad">
+                <h2 class="tarjeta-unidad__titulo">UT1: Introduction and Basic Greetings</h2>
+                <p class="tarjeta-unidad__texto">En esta unidad, aprenderás a presentarte y saludar. Practicaremos con el verbo "To Be" y vocabulario básico como saludos y países.</p>
+            </div>
+            <!-- Quiz de la Unidad -->
+            <div class="tarjeta-unidad">
+                <h3 class="tarjeta-unidad__subtitulo">¡A Practicar!</h3>
+                <div id="quiz-container-UT1" class="contenedor-quiz">
+                    <p class="contenedor-quiz__pregunta" id="question-UT1"></p>
+                    <div class="contenedor-quiz__botones">
+                        <button class="boton-quiz boton-quiz--verdadero" data-answer="true">Verdadero</button>
+                        <button class="boton-quiz boton-quiz--falso" data-answer="false">Falso</button>
+                    </div>
+                    <p id="feedback-UT1" class="contenedor-quiz__retroalimentacion"></p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Agrega secciones para las otras unidades aquí (UT2, UT3, etc.) -->
+
+    </main>
+</div>
+
+<!-- Scripts -->
+<script type="module" src="./user_interface.js"></script>
+<script type="module" src="./conexion_firebase.js"></script>
+<script type="module" src="./notificaciones.js"></script>
+<script type="module">
+    import { setupUserPanelLogic } from './user_interface.js';
+    document.addEventListener('DOMContentLoaded', () => {
+        const userPanelElement = document.getElementById('user-panel');
+        if (userPanelElement) {
+            setupUserPanelLogic(userPanelElement, 'Estudiante');
+        }
+    });
+</script>
+</body>
+</html>

@@ -24,6 +24,10 @@ export const setupGoogleLogin = () => {
 
             try {
                 const result = await signInWithPopup(auth, provider);
+                
+                $signupModal.close();
+                $signupForm.reset();
+                
                 const user = result.user;
                 const uid = user.uid;
                 const email = user.email;
@@ -48,8 +52,7 @@ export const setupGoogleLogin = () => {
                 // Por ahora, usamos una lógica simple.
 
 
-                $signupModal.close();
-                $signupForm.reset();
+             
                 /* 
                 if ($signupModal) {
                     $signupModal.style.display = 'none';
