@@ -24,7 +24,7 @@ export const setupAdminPanelLogic = (panelElement, adminRole) => {
         const updateProfileUI = (user) => {
             if (user && adminNameSpan) {
                 // Actualiza el nombre con el correo electrónico del usuario
-                adminNameSpan.textContent = user.email;
+                adminNameSpan.textContent = user.displayName;
             }
         };
 

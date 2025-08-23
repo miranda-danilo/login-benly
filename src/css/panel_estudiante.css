@@ -1,0 +1,459 @@
+        /* ==========================================================================
+           CSS Reset y Estilos Globales (Mobile-First)
+           ========================================================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F3F4F6;
+            color: #1F2937;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .contenedor {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        @media (min-width: 768px) {
+            .contenedor {
+                flex-direction: row;
+            }
+        }
+
+        /* ==========================================================================
+           Barra Lateral (Bloque)
+           ========================================================================== */
+        .barra-lateral {
+            width: 100%;
+            background-color: #1F2937;
+            color: #E5E7EB;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease-in-out;
+            z-index: 10;
+        }
+
+        @media (min-width: 768px) {
+            .barra-lateral {
+                width: 18rem;
+                position: sticky;
+                top: 0;
+                height: 100vh;
+                align-items: flex-start;
+            }
+        }
+
+        .barra-lateral__encabezado {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .barra-lateral__icono {
+            width: 2rem;
+            height: 2rem;
+            color: #34D399;
+            margin-right: 0.5rem;
+        }
+
+        .barra-lateral__titulo {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .barra-lateral__nav {
+            width: 100%;
+        }
+
+        .lista-unidades {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .unidad-link {
+            display: block;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            color: #E5E7EB;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            font-weight: 500;
+        }
+
+        .unidad-link:hover {
+            background-color: #374151;
+        }
+
+        .unidad-link--activo {
+            background-color: #4B5563;
+            color: #E5E7EB;
+        }
+
+        .unidad-link--completada {
+            background-color: #58CC02;
+           /*  background-color: #A7F3D0; */
+            /* color: #1F2937; */
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .unidad-link--completada:hover {
+            background-color: #58CC02aa
+        }
+
+        /* ==========================================================================
+           Contenido Principal (Bloque)
+           ========================================================================== */
+        .contenido-principal {
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        @media (min-width: 768px) {
+            .contenido-principal {
+                padding: 2.5rem;
+            }
+        }
+
+        .panel-usuario {
+            margin-bottom: 2rem;
+        }
+
+        .panel-usuario__tarjeta {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 1rem;
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        @media (min-width: 768px) {
+            .panel-usuario__tarjeta {
+                flex-direction: row;
+                text-align: left;
+                align-items: flex-start;
+            }
+        }
+
+        .panel-usuario__foto {
+            width: 5rem;
+            height: 5rem;
+            border-radius: 9999px;
+            margin-bottom: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .panel-usuario__foto {
+                margin-right: 1.5rem;
+                margin-bottom: 0;
+            }
+        }
+
+        .panel-usuario__info {
+            flex-grow: 1;
+        }
+
+        .panel-usuario__titulo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .panel-usuario__texto {
+            font-size: 0.875rem;
+            color: #6B7280;
+        }
+
+        .panel-usuario__texto--pequeño {
+            font-size: 0.75rem;
+        }
+
+        .panel-usuario__rol {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .seccion-contenido {
+            padding: 1rem;
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            margin-top: 1rem;
+        }
+
+        .seccion-contenido__titulo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1F2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .seccion-contenido__subtitulo {
+            font-size: 1rem;
+            color: #6B7280;
+        }
+
+        .seccion-contenido__ilustracion {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 0;
+        }
+
+        .seccion-contenido__ilustracion-icono {
+            width: 4rem;
+            height: 4rem;
+            color: #D1D5DB;
+        }
+
+        .seccion-unidad {
+            padding: 1rem;
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        .seccion-unidad--oculta {
+            display: none;
+        }
+
+        .tarjeta-leccion,
+        .tarjeta-vocabulario,
+        .tarjeta-ejercicios,
+        .tarjeta-actividad {
+            background-color: #F9FAFB;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #E5E7EB;
+        }
+
+        .tarjeta-leccion__titulo,
+        .tarjeta-vocabulario__titulo,
+        .tarjeta-ejercicios__titulo,
+        .tarjeta-actividad__titulo {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1F2937;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #D1D5DB;
+            padding-bottom: 0.5rem;
+        }
+
+        .tarjeta-leccion__subtitulo,
+        .tarjeta-actividad__subtitulo {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .tarjeta-leccion__texto,
+        .tarjeta-vocabulario__texto,
+        .tarjeta-ejercicios__texto {
+            font-size: 0.9rem;
+            color: #4B5563;
+        }
+
+        .contenedor-quiz {
+            background-color: #F3F4F6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .contenedor-quiz__pregunta {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .contenedor-quiz__botones {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .boton-quiz {
+            flex-grow: 1;
+            color: white;
+            font-weight: 700;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .boton-quiz--verdadero {
+            background-color: #22C55E;
+        }
+
+        .boton-quiz--verdadero:hover {
+            background-color: #16A34A;
+        }
+
+        .boton-quiz--falso {
+            background-color: #EF4444;
+        }
+
+        .boton-quiz--falso:hover {
+            background-color: #DC2626;
+        }
+
+        .contenedor-quiz__retroalimentacion {
+            margin-top: 1rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .contenedor-quiz__retroalimentacion--error {
+            color: #EF4444;
+        }
+
+        .contenedor-quiz__retroalimentacion--sucesso {
+            color: #22C55E;
+        }
+
+        .boton-accion {
+            background-color: #3B82F6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .boton-accion:hover {
+            background-color: #2563EB;
+        }
+
+        .juego-ahorcado__palabra {
+            letter-spacing: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .juego-ahorcado__input {
+            width: 3rem;
+            height: 3rem;
+            text-align: center;
+            font-size: 1.25rem;
+            text-transform: uppercase;
+            border: 2px solid #D1D5DB;
+            border-radius: 0.5rem;
+        }
+
+        .juego-ahorcado__letras {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .juego-ahorcado__letra {
+            width: 2.5rem;
+            height: 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border: 2px solid #D1D5DB;
+            border-radius: 0.5rem;
+            background-color: #F9FAFB;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .juego-ahorcado__letra:hover:not(:disabled) {
+            background-color: #E5E7EB;
+        }
+
+        .juego-ahorcado__letra:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .juego-ahorcado__imagen {
+            width: 100%;
+            max-width: 200px;
+            margin: 1rem auto;
+            display: block;
+        }
+
+        .juego-ahorcado__imagen svg {
+            width: 100%;
+            height: auto;
+        }
+
+        .seccion-hablidad {
+            padding: 1.5rem;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            background-color: #F9FAFB;
+        }
+
+        .seccion-habilidad__titulo {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1F2937;
+        }
+
+        .seccion-habilidad__boton {
+            background-color: #3B82F6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .seccion-habilidad__boton:hover {
+            background-color: #2563EB;
+        }
+
+        .seccion-habilidad__texto {
+            margin-top: 0.5rem;
+            font-size: 1rem;
+            color: #4B5563;
+            line-height: 1.5;
+        }
+
+        .seccion-habilidad__input {
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            border: 1px solid #D1D5DB;
+            margin-top: 0.5rem;
+        }

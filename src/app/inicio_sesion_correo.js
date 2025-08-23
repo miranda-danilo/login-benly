@@ -1,5 +1,5 @@
 import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
-import { doc, setDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 import { auth, db } from "./conexion_firebase.js";
 import { showMessage } from "./notificaciones.js";
 
@@ -21,75 +21,44 @@ export function setupSignInForm() {
             const password = $signinForm["signin-password"].value;
 
             try {
-                // Inicia sesión con email y contraseña
+                // Paso 1: Inicia sesión con email y contraseña
                 const response = await signInWithEmailAndPassword(auth, email, password);
+                const user = response.user;
 
                 $signinModal.close();
                 $signinForm.reset();
 
-                // --- ⚠️ Lógica agregada para la verificación de correo ---
-                if (!response.user.emailVerified) {
-                    // Si el correo NO está verificado, cierra la sesión del usuario
-                    // para evitar que acceda a la UI y muestra un mensaje de error.
+                // --- ⚠️ Lógica para la verificación de correo ---
+                if (!user.emailVerified) {
                     await auth.signOut();
                     showMessage("CORREO NO VERIFICADO. LOGIN", "error");
-                    return; // Detiene la ejecución de la función
+                    return;
                 }
                 // --------------------------------------------------------
                 
-               
+                // Paso 2: Obtén el documento del usuario desde Firestore
+                const uid = user.uid;
+                const docRef = doc(db, "usuarios", uid);
+                const docSnap = await getDoc(docRef);
 
-
-                const uid = response.user.uid;
-
-                // ⚠️ Tu lógica para asignar el rol (es mejor hacerlo en el registro,
-                // pero si lo necesitas aquí para mantener la consistencia, es válido)
-                let roleUser = "user";
-                if (email === "miranda-roberth0691@unesum.edu.ec") {
-                    roleUser = "admin";
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    const userName = userData.name;
+                    // Ahora puedes usar userName en tu aplicación
+                    showMessage(`¡Bienvenido, ${userName}!`);
+                } else {
+                    showMessage("¡Bienvenido! (Datos de perfil no encontrados)", "info");
                 }
 
-                // Crea la referencia al documento en Firestore
-                const docRef = doc(db, `usuarios/${uid}`);
-
-                // Guarda la información del usuario en Firestore (o actualiza si ya existe)
-                await setDoc(docRef, {
-                    email: email,
-                    role: roleUser
-                });
-
-
-               /*   $signinModal.close(); */
-
-
-                // Muestra un mensaje de éxito
-                showMessage(`¡Bienvenido!`);
-
-                // Cierra el modal de inicio de sesión
-                // Se asume que 'closeModal' está definida en tu index.js
-                // Puedes usar una función de utilidad si lo prefieres
-
-
-
-/* 
-                if ($signinModal) {
-                    $signinModal.style.display = 'none';
-                    document.body.classList.remove('modal-open');
-                } */
-
-                // Limpia el formulario
-               /*  $signinForm.reset(); */
 
             } catch (error) {
                 const errorCode = error.code;
                 const errorMessage = error.message;
                 console.error("Error al iniciar sesión:", errorCode, errorMessage);
 
-                // Muestra un mensaje de error detallado
-                if (errorCode === "auth/wrong-password") {
-                    showMessage("Contraseña incorrecta", "error");
-                } else if (errorCode === "auth/user-not-found") {
-                    showMessage("Usuario no encontrado", "error");
+                if (errorCode === "auth/wrong-password" || errorCode === "auth/user-not-found") {
+                    showMessage("Credenciales incorrectas", "error");
+                    console.log(errorCode)
                 } else if (errorCode === "auth/invalid-email") {
                     showMessage("Correo inválido", "error");
                 } else {

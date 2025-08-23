@@ -1,50 +1,61 @@
-import { createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
-import { auth } from "./conexion_firebase.js";
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+import { auth, db } from "./conexion_firebase.js";
 import { showMessage } from "../app/notificaciones.js";
 import { signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 
 
-// Obtiene los elementos del DOM necesarios
 const d = document;
 const $signupModal = d.getElementById("signup-modal");
 const $signupForm = d.getElementById("signup-form");
+const $signupName = d.getElementById("signup-name"); // Asegúrate de que tu formulario tenga un campo con este ID.
 
-/**
- * Configura el listener del formulario para el registro de usuarios.
- * Esta función debe ser llamada una vez que el DOM esté cargado.
- */
 export function setupRegistrationForm() {
     d.addEventListener("submit", async (e) => {
-        // Solo ejecuta la lógica si el evento proviene del formulario de registro
         if (e.target === $signupForm) {
             e.preventDefault();
 
             const email = $signupForm["signup-email"].value;
             const password = $signupForm["signup-password"].value;
+            const name = $signupForm["signup-name"].value; // Obtener el nombre del formulario
 
             try {
-                // Crea el usuario con email y contraseña
+                // Paso 1: Crea el usuario en Authentication
                 const response = await createUserWithEmailAndPassword(auth, email, password);
 
-                // Cierra el modal y reinicia el formulario en caso de éxito
+                const user = response.user;
+
+                // Paso 2: Guarda el nombre en el perfil del usuario de Auth
+                await updateProfile(user, {
+                    displayName: name
+                });
+
+                // Paso 3: Crea un documento en Firestore con el UID como ID
+                const uid = user.uid;
+                const docRef = doc(db, "usuarios", uid);
+
+                // Define el rol inicial y los datos que quieres guardar
+                const userData = {
+                    email: email,
+                    role: "user", // Asignar un rol por defecto
+                    name: name // <-- Aquí se agrega el nombre al documento de Firestore
+                };
+
+
+                
+                // Guarda los datos en Firestore
+                await setDoc(docRef, userData, { merge: true }); // <-- Esto mantiene los puntajes y otros campos existentes
+
+                // Paso 4: Envía el email de verificación
+                await sendEmailVerification(user);
+
                 $signupModal.close();
                 $signupForm.reset();
 
-
-                // Envía un email de verificación al usuario recién creado
-                await sendEmailVerification(auth.currentUser);
-
-
-                // Muestra un mensaje de éxito al usuario
-                showMessage("LINK DE VERIFICACIÓN ENVIADO A SU CORREO");
-
-
-
-
-
+                showMessage("¡Registro exitoso! Por favor, verifica tu correo.");
 
             } catch (error) {
-                // Manejo de errores específicos de Firebase
+                // Manejo de errores
                 const errorCode = error.code;
                 if (errorCode === "auth/weak-password") {
                     showMessage("CONTRASEÑA MUY DÉBIL", "error");
@@ -53,7 +64,6 @@ export function setupRegistrationForm() {
                 } else if (errorCode === "auth/email-already-in-use") {
                     showMessage("CORREO YA REGISTRADO", "error");
                 } else {
-                    // Mensaje de error genérico para otros casos
                     showMessage("OCURRIÓ UN ERROR INESPERADO", "error");
                     console.error("Error completo:", error);
                 }

@@ -4,93 +4,120 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Estudiante</title>
-    <!-- Enlace a la fuente Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Enlace a tu nuevo archivo de estilos CSS -->
-    <link rel="stylesheet" href="./styles.css">
+    <script type="module" src="../app/user_interface.js"></script>
 </head>
 <body class="cuerpo">
-
-<div class="contenedor">
-
-    <!-- Barra lateral -->
-    <aside class="barra-lateral">
-        <div class="barra-lateral__encabezado">
-            <svg class="barra-lateral__icono" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.433 9.458 5 8 5c-3.141 0-5.707 2.05-5.707 4.79S4.859 14.58 8 14.58c1.458 0 2.832-.433 4-1.253m0 1.253v13m0-13C13.168 5.433 14.542 5 16 5c3.141 0 5.707 2.05 5.707 4.79S19.141 14.58 16 14.58c-1.458 0-2.832-.433-4-1.253"></path></svg>
-            <h2 class="barra-lateral__titulo">English A1</h2>
-        </div>
-        
-        <nav class="barra-lateral__nav">
-            <ul id="unit-list" class="lista-unidades">
-                <!-- Los enlaces de las unidades se cargarán dinámicamente aquí -->
-            </ul>
-        </nav>
-        <button id="logout-btn" class="boton-cerrar-sesion">
-            Cerrar Sesión
-        </button>
-    </aside>
-
-    <!-- Contenido Principal -->
-    <main class="contenido-principal">
-        <!-- El panel del usuario se mostrará primero -->
-        <section id="user-panel" class="panel-usuario">
-            <div class="panel-usuario__tarjeta">
-                <img id="user-photo" class="panel-usuario__foto" alt="Foto de perfil">
-                <div class="panel-usuario__info">
-                    <h1 class="panel-usuario__titulo">¡Hola, <span id="user-email">Estudiante</span>!</h1>
-                    <p class="panel-usuario__texto">Tu rol es: <span id="user-role" class="panel-usuario__rol"></span></p>
-                    <p class="panel-usuario__texto panel-usuario__texto--pequeño">Bienvenido a tu herramienta de aprendizaje de inglés A1.</p>
-                </div>
+    <div class="contenedor">
+        <aside class="barra-lateral">
+            <div class="barra-lateral__encabezado">
+                <svg class="barra-lateral__icono" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.433 9.458 5 8 5c-3.141 0-5.707 2.05-5.707 4.79S4.859 14.58 8 14.58c1.458 0 2.832-.433 4-1.253m0 1.253v13m0-13C13.168 5.433 14.542 5 16 5c3.141 0 5.707 2.05 5.707 4.79S19.141 14.58 16 14.58c-1.458 0-2.832-.433-4-1.253"></path></svg>
+                <h2 class="barra-lateral__titulo">English A1</h2>
             </div>
-            <div id="main-content" class="seccion-contenido">
-                <h1 class="seccion-contenido__titulo">Selecciona una unidad</h1>
-                <p class="seccion-contenido__subtitulo">Usa el menú lateral para comenzar a aprender y practicar.</p>
-                <div class="seccion-contenido__ilustracion">
-                    <svg class="seccion-contenido__ilustracion-icono" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg>
-                </div>
-            </div>
-        </section>
-
-        <!-- Secciones de Contenido de las Unidades (ocultas por defecto) -->
-        <section id="unit-UT1" class="seccion-unidad seccion-unidad--oculta">
-            <!-- Contenido de la Unidad -->
-            <div class="tarjeta-unidad">
-                <h2 class="tarjeta-unidad__titulo">UT1: Introduction and Basic Greetings</h2>
-                <p class="tarjeta-unidad__texto">En esta unidad, aprenderás a presentarte y saludar. Practicaremos con el verbo "To Be" y vocabulario básico como saludos y países.</p>
-            </div>
-            <!-- Quiz de la Unidad -->
-            <div class="tarjeta-unidad">
-                <h3 class="tarjeta-unidad__subtitulo">¡A Practicar!</h3>
-                <div id="quiz-container-UT1" class="contenedor-quiz">
-                    <p class="contenedor-quiz__pregunta" id="question-UT1"></p>
-                    <div class="contenedor-quiz__botones">
-                        <button class="boton-quiz boton-quiz--verdadero" data-answer="true">Verdadero</button>
-                        <button class="boton-quiz boton-quiz--falso" data-answer="false">Falso</button>
+            <nav class="barra-lateral__nav">
+                <ul id="unit-list" class="lista-unidades"></ul>
+            </nav>
+        </aside>
+        <main class="contenido-principal">
+            <section id="user-panel" class="panel-usuario">
+                <div class="panel-usuario__tarjeta">
+                    <img id="user-photo" class="panel-usuario__foto" alt="Foto de perfil">
+                    <div class="panel-usuario__info">
+                        <h1 class="panel-usuario__titulo">¡Hola, <span id="user-email">Estudiante</span>!</h1>
+                        <p class="panel-usuario__texto">Tu rol es: <span id="user-role" class="panel-usuario__rol"></span></p>
+                        <p class="panel-usuario__texto panel-usuario__texto--pequeño">Bienvenido a tu herramienta de aprendizaje de inglés A1.</p>
+                        
                     </div>
-                    <p id="feedback-UT1" class="contenedor-quiz__retroalimentacion"></p>
                 </div>
-            </div>
-        </section>
-        
-        <!-- Agrega secciones para las otras unidades aquí (UT2, UT3, etc.) -->
-
-    </main>
-</div>
-
-<!-- Scripts -->
-<script type="module" src="./user_interface.js"></script>
-<script type="module" src="./conexion_firebase.js"></script>
-<script type="module" src="./notificaciones.js"></script>
-<script type="module">
-    import { setupUserPanelLogic } from './user_interface.js';
-    document.addEventListener('DOMContentLoaded', () => {
-        const userPanelElement = document.getElementById('user-panel');
-        if (userPanelElement) {
-            setupUserPanelLogic(userPanelElement, 'Estudiante');
-        }
-    });
-</script>
+                <div id="main-content" class="seccion-contenido">
+                    <h1 class="seccion-contenido__titulo">Selecciona una unidad</h1>
+                    <p class="seccion-contenido__subtitulo">Usa el menú lateral para comenzar a aprender y practicar.</p>
+                    <div class="seccion-contenido__ilustracion">
+                        <svg class="seccion-contenido__ilustracion-icono" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg>
+                    </div>
+                </div>
+            </section>
+            <!-- Secciones de las unidades: el contenido se mantiene pero los tests ahora están en todas las unidades -->
+            <section id="unit-UT1" class="seccion-unidad seccion-unidad--oculta">
+                <div class="tarjeta-leccion">
+                    <h2 class="tarjeta-leccion__titulo">Lección: To Be & Greetings</h2>
+                    <p class="tarjeta-leccion__texto">Aprende a usar el verbo "To Be" y los saludos básicos. Ejercicios y ejemplos incluidos.</p>
+                    <ul>
+                        <li><b>I am</b> a student.</li>
+                        <li><b>He/She/It is</b> a teacher.</li>
+                        <li><b>You/We/They are</b> friends.</li>
+                    </ul>
+                </div>
+                <div class="tarjeta-vocabulario">
+                    <h2 class="tarjeta-vocabulario__titulo">Vocabulario Básico</h2>
+                    <ul>
+                        <li>Hello / Hi: Hola</li>
+                        <li>Goodbye / Bye: Adiós</li>
+                        <li>Good morning: Buenos días</li>
+                        <li>Good afternoon: Buenas tardes</li>
+                        <li>Good evening: Buenas noches (al llegar)</li>
+                        <li>Good night: Buenas noches (al despedirse)</li>
+                    </ul>
+                </div>
+                <div class="tarjeta-ejercicios">
+                    <h2 class="tarjeta-ejercicios__titulo">Ejercicio de escritura</h2>
+                    <p class="tarjeta-ejercicios__texto">Escribe una presentación usando "To Be".</p>
+                    <input type="text" class="seccion-habilidad__input" placeholder="Ej: I am Juan.">
+                </div>
+                <div class="tarjeta-actividad">
+                    <h3 class="tarjeta-actividad__subtitulo">Test: Verdadero o Falso</h3>
+                    <div id="quiz-container-UT1" class="contenedor-quiz">
+                        <p class="contenedor-quiz__pregunta" id="question-UT1"></p>
+                        <div class="contenedor-quiz__botones">
+                            <button class="boton-quiz boton-quiz--verdadero" data-answer="true">Verdadero</button>
+                            <button class="boton-quiz boton-quiz--falso" data-answer="false">Falso</button>
+                        </div>
+                        <p id="feedback-UT1" class="contenedor-quiz__retroalimentacion"></p>
+                    </div>
+                </div>
+            </section>
+            <!-- Repite la estructura para UT2 a UT6, cambiando el contenido y el test -->
+            <section id="unit-UT2" class="seccion-unidad seccion-unidad--oculta">
+                <div class="tarjeta-leccion">
+                    <h2 class="tarjeta-leccion__titulo">Lección: People and Places</h2>
+                    <p class="tarjeta-leccion__texto">Describe personas y lugares usando adjetivos posesivos.</p>
+                    <ul>
+                        <li>My book</li>
+                        <li>Your car</li>
+                        <li>His name</li>
+                        <li>Her phone</li>
+                    </ul>
+                </div>
+                <div class="tarjeta-vocabulario">
+                    <h2 class="tarjeta-vocabulario__titulo">Vocabulario de la Familia</h2>
+                    <ul>
+                        <li>Father / Dad: Padre / Papá</li>
+                        <li>Mother / Mom: Madre / Mamá</li>
+                        <li>Brother: Hermano</li>
+                        <li>Sister: Hermana</li>
+                        <li>Son: Hijo</li>
+                        <li>Daughter: Hija</li>
+                    </ul>
+                </div>
+                <div class="tarjeta-ejercicios">
+                    <h2 class="tarjeta-ejercicios__titulo">Ejercicio de escritura</h2>
+                    <p class="tarjeta-ejercicios__texto">Escribe una oración sobre tu familia usando adjetivos posesivos.</p>
+                    <input type="text" class="seccion-habilidad__input" placeholder="Ej: Her name is Sofia.">
+                </div>
+                <div class="tarjeta-actividad">
+                    <h3 class="tarjeta-actividad__subtitulo">Test: Verdadero o Falso</h3>
+                    <div id="quiz-container-UT2" class="contenedor-quiz">
+                        <p class="contenedor-quiz__pregunta" id="question-UT2"></p>
+                        <div class="contenedor-quiz__botones">
+                            <button class="boton-quiz boton-quiz--verdadero" data-answer="true">Verdadero</button>
+                            <button class="boton-quiz boton-quiz--falso" data-answer="false">Falso</button>
+                        </div>
+                        <p id="feedback-UT2" class="contenedor-quiz__retroalimentacion"></p>
+                    </div>
+                </div>
+            </section>
+            <!-- Repite igual para UT3, UT4, UT5, UT6, cambiando el contenido y el test -->
+            <!-- ... -->
+        </main>
+    </div>
 </body>
 </html>

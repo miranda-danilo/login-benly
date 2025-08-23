@@ -814,7 +814,8 @@ background-color: transparent;
 }
 
 .modal-form input[type="email"],
-.modal-form input[type="password"] {
+.modal-form input[type="password"],
+.modal-form input[type="text"]{
     width: 100%;
     padding: 0.8rem;
     border: 1px solid #ccc;

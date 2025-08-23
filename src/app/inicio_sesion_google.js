@@ -29,8 +29,13 @@ export const setupGoogleLogin = () => {
                 $signupForm.reset();
                 
                 const user = result.user;
+
+             
+
                 const uid = user.uid;
                 const email = user.email;
+                const name = user.displayName;
+           
 
                 // ⚠️ Tu lógica para asignar el rol
                 let roleUser = "user";
@@ -44,20 +49,17 @@ export const setupGoogleLogin = () => {
                 // Guarda la información del usuario en Firestore
                 await setDoc(docRef, {
                     email: email,
-                    role: roleUser
-                });
+                    role: roleUser,
+                    name: name
+                }, { merge: true }); // <-- Esto mantiene los puntajes y otros campos existentes
+
+
+
+  
 
                 // Cierra el modal de registro después del inicio de sesión
                 // Asegúrate de que tu función 'closeModal' esté definida en tu index.js
                 // Por ahora, usamos una lógica simple.
-
-
-             
-                /* 
-                if ($signupModal) {
-                    $signupModal.style.display = 'none';
-                    document.body.classList.remove('modal-open');
-                } */
 
                 // Muestra un mensaje de éxito
                 showMessage(`¡Bienvenido, ${user.displayName}!`);
