@@ -13,10 +13,15 @@ document.addEventListener("DOMContentLoaded", () => {
     setupGoogleLogin()
     setupSignInForm()
     stateChanged()
+  
+
+
+
+
    
  /*    cerrarSesion() */
 
-  
+
 
 });
 
@@ -99,9 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-
-
-
+ 
 
 
 
