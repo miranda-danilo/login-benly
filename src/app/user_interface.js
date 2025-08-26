@@ -3,6 +3,9 @@ import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstat
 import { auth, db } from "./conexion_firebase.js";
 import { showMessage } from "./notificaciones.js";
 
+// ... tus importaciones existentes
+
+
 // Unidades y tests (8 preguntas por unidad)
 const units = [
     { id: 'UT1', title: 'Introduction and Basic Greetings', quiz: 'true_false' },
@@ -11,6 +14,11 @@ const units = [
     { id: 'UT4', title: 'Foods and Drinks', quiz: 'true_false' },
     { id: 'UT5', title: 'Things I Have', quiz: 'true_false' },
     { id: 'UT6', title: 'Around Town - Free Time', quiz: 'true_false' },
+    { id: 'JUEGOS', title: 'Juegos - Ahorcado', quiz: 'none' },
+    { id: 'WRITING', title: 'Práctica de Escritura', quiz: 'none' }, // Removed interactive test
+    { id: 'EXAM1', title: 'FIRST TERM EXAMEN', quiz: 'true_false' },
+    { id: 'EXAM2', title: 'SECOND TERM EXAMEN', quiz: 'true_false' },
+    /* { id: 'UT7', title: 'Around Town - Free Time', quiz: 'true_false' }, */
 ];
 
 const quizData = {
@@ -73,10 +81,184 @@ const quizData = {
         { question: "Cinema is a place to watch movies.", answer: "true" },
         { question: "Swimming pool is for reading.", answer: "false" },
         { question: "Restaurant is a place to eat.", answer: "true" }
-    ]
+    ],
+    'EXAM1': [
+        { question: "The verb 'to be' has three forms: am, is, are.", answer: "true" },
+        { question: "'Good morning' is used to say hello in the evening.", answer: "false" },
+        { question: "Possessive adjectives like 'my', 'your', 'his' show ownership.", answer: "true" },
+        { question: "'Brother' means the same as 'sister'.", answer: "false" },
+        { question: "Adverbs of frequency include 'always', 'never', and 'sometimes'.", answer: "true" },
+        { question: "'Wake up' means the same as 'go to bed'.", answer: "false" },
+        { question: "Countable nouns can be singular or plural.", answer: "true" },
+        { question: "'Water' is a countable noun.", answer: "false" }
+    ],
+    'EXAM2': [
+        { question: "'I have a phone' is a correct sentence.", answer: "true" },
+        { question: "'Keys' means 'comida' in Spanish.", answer: "false" },
+        { question: "Present continuous can be used for future plans.", answer: "true" },
+        { question: "'Library' is a place to eat food.", answer: "false" },
+        { question: "Basic greetings include 'hello' and 'goodbye'.", answer: "true" },
+        { question: "'Good afternoon' is used at night.", answer: "false" },
+        { question: "Family vocabulary includes 'father', 'mother', 'brother'.", answer: "true" },
+        { question: "'Son' means 'hija' in Spanish.", answer: "false" }
+    ],
+    /* 'UT7': [
+        { question: "Bank is a place in town.", answer: "true" },
+        { question: "Playing sports is a hobby.", answer: "true" },
+        { question: "Present continuous is used for future plans.", answer: "true" },
+        { question: "Library is a place to eat.", answer: "false" },
+        { question: "Park is a place for free time.", answer: "true" },
+        { question: "Cinema is a place to watch movies.", answer: "true" },
+        { question: "Swimming pool is for reading.", answer: "false" },
+        { question: "Restaurant is a place to eat.", answer: "true" }
+    ] */
 };
 
+
 export const setupUserPanelLogic = (panelElement, userRole) => {
+    
+ const sentenceInput = document.getElementById('sentenceInput');
+        const correctButton = document.getElementById('correctButton');
+        const feedbackContainer = document.getElementById('feedbackContainer');
+        const feedbackContent = document.getElementById('feedbackContent');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const alertPlaceholder = document.getElementById('alertPlaceholder');
+
+        // Función para mostrar mensajes de alerta
+        const showAlert = (message) => {
+            alertPlaceholder.innerHTML = `<div class="alert-message">${message}</div>`;
+        };
+        
+        
+
+
+        // Función para realizar la llamada a la API con reintentos y retroceso exponencial
+        async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                if (retries > 0) {
+                    await new Promise(res => setTimeout(res, delay));
+                    return fetchWithRetry(url, options, retries - 1, delay * 2);
+                } else {
+                    throw error;
+                }
+            }
+        }
+
+        correctButton.addEventListener('click', async () => {
+            const sentence = sentenceInput.value.trim();
+            if (!sentence) {
+                showAlert('Por favor, escribe una oración para verificar.');
+                return;
+            }
+
+            // Ocultar mensajes de alerta anteriores
+            alertPlaceholder.innerHTML = '';
+            
+            // Mostrar estado de carga
+            feedbackContainer.classList.remove('hidden');
+            feedbackContent.classList.add('hidden');
+            loadingIndicator.classList.remove('hidden');
+
+            try {
+                // El prompt para el modelo Gemini
+                const prompt = `Actúa como un corrector de oraciones en inglés. Analiza la siguiente oración y determina si es gramaticalmente correcta. Si es correcta, devuelve un JSON con el estado "Correcta". Si es incorrecta, devuelve un JSON con el estado "Incorrecta", la versión corregida de la oración y una explicación clara y concisa de los errores en español.
+                
+                Oración: "${sentence}"
+                
+                Ejemplo de JSON correcto:
+                {
+                    "status": "Correcta"
+                }
+                
+                Ejemplo de JSON incorrecto:
+                {
+                    "status": "Incorrecta",
+                    "corrected_sentence": "The man goes to the store.",
+                    "explanation": "El verbo 'go' debe estar en su forma 'goes' para concordar con el sujeto 'the man' en tercera persona del singular."
+                }`;
+
+                const payload = {
+                    contents: [{ role: "user", parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                status: { type: "STRING" },
+                                corrected_sentence: { type: "STRING", description: "Only required if status is 'Incorrecta'" },
+                                explanation: { type: "STRING", description: "Only required if status is 'Incorrecta'" }
+                            },
+                            required: ["status"]
+                        }
+                    }
+                };
+
+                const apiKey = "AIzaSyDk6yjhp_DZ3gXUob4gID6vKrDLAaD-OGY";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                const response = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = response.candidates[0].content.parts[0].text;
+                const parsedResult = JSON.parse(result);
+
+                // Actualizar la interfaz de usuario con el resultado
+                let outputHtml = '';
+
+
+
+                if (parsedResult.status === 'Correcta') {
+                    outputHtml = `
+                        <p class="feedback-message feedback-message--correct">
+                            <svg class="feedback-message__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            ¡Correcta!
+                        </p>
+                        <p class="feedback-explanation">Tu oración es gramaticalmente correcta.</p>
+                    `;
+                } else {
+                    outputHtml = `
+                        <p class="feedback-message feedback-message--incorrect">
+                            <svg class="feedback-message__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            ¡Incorrecta!
+                        </p>
+                        <div class="corrected-section">
+                            <h3 class="input-label">Versión corregida:</h3>
+                            <p class="corrected-text">"${parsedResult.corrected_sentence}"</p>
+                        </div>
+                        <div class="explanation-section">
+                            <h3 class="input-label">Explicación:</h3>
+                            <p class="explanation-text">${parsedResult.explanation}</p>
+                        </div>
+                    `;
+                }
+
+               
+                console.log('API Response:', parsedResult);
+
+                feedbackContent.innerHTML = outputHtml;
+            } catch (error) {
+                console.error('Error:', error);
+                feedbackContent.innerHTML = `
+                    <p class="error-message">Ocurrió un error al procesar la solicitud. Por favor, inténtalo de nuevo.</p>
+                    <p class="error-detail">Detalles del error: ${error.message}</p>
+                `;
+            } finally {
+                // Ocultar estado de carga y mostrar contenido
+                loadingIndicator.classList.add('hidden');
+                feedbackContent.classList.remove('hidden');
+            }
+        });
+
+    
     if (!panelElement) return;
 
     const userEmailSpan = panelElement.querySelector("#user-email");
@@ -195,8 +377,9 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
     };
 
     // Renderiza contenido de unidad y test
- // Renderiza contenido de unidad y test
+
 const renderUnitContent = (unitId) => {
+  
     // Oculta el panel de bienvenida
     const userPanel = document.getElementById('user-panel');
     if (userPanel) userPanel.style.display = 'none';
@@ -217,35 +400,65 @@ const renderUnitContent = (unitId) => {
         // Elimina quiz anterior si existe
         const oldQuiz = unitSection.querySelector('.tarjeta-actividad');
         if (oldQuiz) oldQuiz.remove();
-        // Inserta el quiz al final del contenido de la unidad
-        const quizDiv = document.createElement('div');
-        quizDiv.className = 'tarjeta-actividad';
-        quizDiv.innerHTML = `
-            <h3 class="tarjeta-actividad__subtitulo">Test Interactivo</h3>
-            <div class="quiz-progress-bar"><div id="quiz-progress-${unitId}" class="quiz-progress-bar-fill"></div></div>
-            <div id="quiz-container-${unitId}" class="contenedor-quiz">
-                <p class="contenedor-quiz__pregunta" id="question-${unitId}"></p>
-                <div class="contenedor-quiz__botones">
-                    <button class="boton-quiz boton-quiz--verdadero" data-answer="true">Verdadero</button>
-                    <button class="boton-quiz boton-quiz--falso" data-answer="false">Falso</button>
+        // Solo inserta el quiz si no es la unidad WRITING
+       
+    
+       
+        if (unitId !== 'WRITING' && unitId !== 'JUEGOS') {
+            const quizDiv = document.createElement('div');
+            quizDiv.className = 'tarjeta-actividad';
+        
+    
+            // Different text for exams vs regular units
+            const isExam = unitId === 'EXAM1' || unitId === 'EXAM2';
+            const infoText = isExam ? 
+                'El examen solo se podrá dar una vez.‼️‼️' : 
+                'Solo se guardará tu nota más alta en este test.';
+            
+            quizDiv.innerHTML = `
+                <h3 class="tarjeta-actividad__subtitulo">Test Interactivo</h3>
+                <div class="quiz-progress-bar"><div id="quiz-progress-${unitId}" class="quiz-progress-bar-fill"></div></div>
+                <div id="quiz-container-${unitId}" class="contenedor-quiz">
+                    <p class="contenedor-quiz__pregunta" id="question-${unitId}"></p>
+                    <div class="contenedor-quiz__botones">
+                        <button class="boton-quiz boton-quiz--verdadero" data-answer="true">Verdadero</button>
+                        <button class="boton-quiz boton-quiz--falso" data-answer="false">Falso</button>
+                    </div>
+                    <p id="feedback-${unitId}" class="contenedor-quiz__retroalimentacion"></p>
+                    <button id="repeat-quiz-${unitId}" class="boton-quiz--repeat" style="display:none;">Repetir Quiz</button>
+                    <p style="margin-top:1rem;font-weight:bold;"><b>${infoText}</b></p>
                 </div>
-                <p id="feedback-${unitId}" class="contenedor-quiz__retroalimentacion"></p>
-                <button id="repeat-quiz-${unitId}" class="boton-quiz--repeat" style="display:none;">Repetir Quiz</button>
-                <p style="margin-top:1rem;font-weight:bold;"><b>Solo se guardará tu nota más alta en este test.</b></p>
-            </div>
-        `;
-        unitSection.appendChild(quizDiv);
-        setupTrueFalseQuiz(unitId);
-
+            `;
+            unitSection.appendChild(quizDiv);
+            setupTrueFalseQuiz(unitId);
+        } 
+        else if (unitId === 'JUEGOS') {
+            
+            setupHangmanGame();
+        }
+        
+        
         // Audio dinámico para todas las unidades
-       setTimeout(() => {
-    const audioBtn = document.getElementById(`audio-${unitId.toLowerCase()}`);
+setTimeout(() => {
+    const playBtn = document.getElementById(`audio-play-${unitId.toLowerCase()}`);
+    const pauseBtn = document.getElementById(`audio-pause-${unitId.toLowerCase()}`);
     const stopBtn = document.getElementById(`audio-stop-${unitId.toLowerCase()}`);
     let utterance;
+    let isPaused = false;
+    let isSpeaking = false;
 
-    if (audioBtn) {
-        audioBtn.onclick = () => {
+    if (playBtn) {
+        playBtn.onclick = () => {
             window.speechSynthesis.cancel();
+            isPaused = false;
+            isSpeaking = true;
+
+            playBtn.classList.add('boton-audio--playing');
+            playBtn.innerHTML = '🔊 Reproduciendo...';
+            pauseBtn.classList.add('boton-audio--pause');
+            pauseBtn.classList.remove('boton-audio--resume');
+            pauseBtn.innerHTML = '⏸️ Pausar';
+            stopBtn.classList.add('boton-audio--stop');
 
             // Solo lee el texto en inglés, ignorando lo que está dentro de <span>
             const leccionUl = unitSection.querySelector('.tarjeta-leccion ul');
@@ -256,13 +469,10 @@ const renderUnitContent = (unitId) => {
                 if (!ul) return '';
                 return Array.from(ul.querySelectorAll('li'))
                     .map(li => {
-                        // Si hay <span>, elimina su texto
                         const span = li.querySelector('span');
                         if (span) {
-                            // Quita el texto del span del li
                             return li.innerText.replace(span.innerText, '').trim();
                         }
-                        // Si hay ":", ignora todo después del ":"
                         if (li.innerText.includes(':')) {
                             return li.innerText.split(':')[0].trim();
                         }
@@ -277,13 +487,58 @@ const renderUnitContent = (unitId) => {
 
             utterance = new SpeechSynthesisUtterance(texto);
             utterance.lang = 'en-US';
+
+            utterance.onend = () => {
+                isSpeaking = false;
+                playBtn.classList.remove('boton-audio--playing');
+                playBtn.innerHTML = '▶️ Reproducir';
+                pauseBtn.classList.add('boton-audio--pause');
+                pauseBtn.classList.remove('boton-audio--resume');
+                pauseBtn.innerHTML = '⏸️ Pausar';
+            };
+            utterance.onpause = () => {
+                isPaused = true;
+                pauseBtn.classList.remove('boton-audio--pause');
+                pauseBtn.classList.add('boton-audio--resume');
+                pauseBtn.innerHTML = '▶️ Reanudar';
+            };
+            utterance.onresume = () => {
+                isPaused = false;
+                pauseBtn.classList.add('boton-audio--pause');
+                pauseBtn.classList.remove('boton-audio--resume');
+                pauseBtn.innerHTML = '⏸️ Pausar';
+            };
+
             window.speechSynthesis.speak(utterance);
         };
+    }
+    if (pauseBtn) {
+        pauseBtn.onclick = () => {
+            if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+                window.speechSynthesis.pause();
+            } else if (window.speechSynthesis.paused && isPaused) {
+                window.speechSynthesis.resume();
+            }
+        };
+        pauseBtn.classList.add('boton-audio--pause');
+        pauseBtn.classList.remove('boton-audio--resume');
+        pauseBtn.innerHTML = '⏸️ Pausar';
     }
     if (stopBtn) {
         stopBtn.onclick = () => {
             window.speechSynthesis.cancel();
+            if (playBtn) {
+                playBtn.classList.remove('boton-audio--playing');
+                playBtn.innerHTML = '▶️ Reproducir';
+            }
+            if (pauseBtn) {
+                pauseBtn.classList.add('boton-audio--pause');
+                pauseBtn.classList.remove('boton-audio--resume');
+                pauseBtn.innerHTML = '⏸️ Pausar';
+            }
         };
+        stopBtn.classList.add('boton-audio--stop');
+        stopBtn.innerHTML = '⏹️ Parar';
     }
 }, 0);
     } else {
@@ -349,7 +604,7 @@ const renderGradesSection = () => {
     if (gradesTab) gradesTab.classList.add('unidad-link--activo');
 };
 
-    // Quiz interactivo con barra de progreso y botón repetir
+    // Quiz interactivo con barra de progreso - Exámenes solo permiten un intento
 const setupTrueFalseQuiz = (unitId) => {
     let currentQuestionIndex = 0;
     let correctAnswers = 0;
@@ -403,12 +658,26 @@ const setupTrueFalseQuiz = (unitId) => {
             quizBtns.forEach(btn => btn.disabled = false);
         } else {
             const score = (correctAnswers / totalQuestions) * 10;
-            questionEl.textContent = `Quiz completado. Tu puntaje es: ${score.toFixed(1)}/10`;
-            feedbackEl.textContent = score >= 7 ? '¡Felicidades!' : 'Puedes mejorar tu puntaje.';
+            questionEl.textContent = `Examen completado. Tu puntaje es: ${score.toFixed(1)}/10`;
+            
+            // Para exámenes (EXAM1 y EXAM2), mostrar mensaje de un solo intento
+            if (unitId === 'EXAM1' || unitId === 'EXAM2') {
+                feedbackEl.textContent = 'danilo miranda xd';
+            } else {
+                feedbackEl.textContent = score >= 7 ? '¡Felicidades!' : 'Puedes mejorar tu puntaje.';
+            }
+            
             feedbackEl.classList.toggle('contenedor-quiz__retroalimentacion--sucesso', score >= 7);
             feedbackEl.classList.toggle('contenedor-quiz__retroalimentacion--error', score < 7);
             quizBtns.forEach(btn => btn.disabled = true);
-            repeatBtn.style.display = "inline-block";
+            
+            // Ocultar botón de repetir para exámenes
+            if (unitId === 'EXAM1' || unitId === 'EXAM2') {
+                repeatBtn.style.display = "none";
+            } else {
+                repeatBtn.style.display = "inline-block";
+            }
+            
             // Sonido y notificación final
             if (score >= 7) {
                 playSound("win");
@@ -450,27 +719,213 @@ const setupTrueFalseQuiz = (unitId) => {
         };
     });
 
-    repeatBtn.onclick = () => {
-        currentQuestionIndex = 0;
-        correctAnswers = 0;
-        quizBtns.forEach(btn => btn.disabled = false);
-        repeatBtn.style.display = "none";
-        showQuestion();
-    };
+    // Solo mostrar botón de repetir para unidades normales, no para exámenes
+    if (repeatBtn) {
+        if (unitId === 'EXAM1' || unitId === 'EXAM2') {
+            repeatBtn.style.display = "none";
+        } else {
+            repeatBtn.onclick = () => {
+                currentQuestionIndex = 0;
+                correctAnswers = 0;
+                quizBtns.forEach(btn => btn.disabled = false);
+                repeatBtn.style.display = "none";
+                showQuestion();
+            };
+        }
+    }
 
     const scoreData = userScores[unitId];
     if (scoreData) {
-        questionEl.textContent = `Quiz completado. Tu puntaje es: ${scoreData.score.toFixed(1)}/10`;
-        feedbackEl.textContent = scoreData.completada ? '¡Felicidades!' : 'Puedes mejorar tu puntaje.';
+        questionEl.textContent = `Examen completado. Tu puntaje es: ${scoreData.score.toFixed(1)}/10`;
+        
+        // Para exámenes, mostrar mensaje de un solo intento
+        if (unitId === 'EXAM1' || unitId === 'EXAM2') {
+            feedbackEl.textContent = 'EXAMEN REALIZADO.';
+        } else {
+            feedbackEl.textContent = scoreData.completada ? '¡Felicidades!' : 'Puedes mejorar tu puntaje.';
+        }
+        
         feedbackEl.classList.toggle('contenedor-quiz__retroalimentacion--sucesso', scoreData.completada);
         feedbackEl.classList.toggle('contenedor-quiz__retroalimentacion--error', !scoreData.completada);
         quizBtns.forEach(btn => btn.disabled = true);
-        repeatBtn.style.display = "inline-block";
+        
+        // Ocultar botón de repetir para exámenes
+        if (unitId === 'EXAM1' || unitId === 'EXAM2') {
+            if (repeatBtn) repeatBtn.style.display = "none";
+        } else {
+            if (repeatBtn) repeatBtn.style.display = "inline-block";
+        }
     } else {
         showQuestion();
     }
 };
 
+// ==========================================================================
+// Lógica del Juego del Ahorcado
+// ==========================================================================
+
+function setupHangmanGame() {
+    const unitWords = {
+        UT1: ['hello', 'bye', 'morning', 'night', 'teacher', 'student'],
+        UT2: ['mother', 'father', 'sister', 'brother', 'family', 'home', 'city', 'town'],
+        UT3: ['always', 'never', 'sometimes', 'schedule', 'morning', 'evening'],
+        UT4: ['apple', 'banana', 'orange', 'grape', 'sandwich', 'water', 'juice', 'coffee'],
+        UT5: ['phone', 'laptop', 'bag', 'wallet', 'keys', 'notebook', 'shoe'],
+        UT6: ['town', 'bank', 'store', 'park', 'movies', 'sports', 'reading', 'cooking']
+    };
+
+    const wordDisplay = document.getElementById('hangman-word');
+    const messageDisplay = document.getElementById('hangman-message');
+    const lettersContainer = document.getElementById('hangman-letters');
+    const subtitulo = document.getElementById('subtitulo');
+    const restartButton = document.getElementById('hangman-restart-button');
+    const unitSelector = document.getElementById('unit-selector');
+    const hangmanParts = document.querySelectorAll('.parte-ahorcado');
+
+    let secretWord = '';
+    let guessedLetters = [];
+    let mistakesLeft = 6;
+    let currentScore = 0;
+
+    function updateWordDisplay() {
+        let display = '';
+        for (const letter of secretWord) {
+            if (guessedLetters.includes(letter)) {
+                display += letter + ' ';
+            } else {
+                display += '_ ';
+            }
+        }
+        wordDisplay.textContent = display.trim();
+        console.log('Palabra actualizada en pantalla:', wordDisplay.textContent);
+    }
+
+    function updateHangman() {
+        const partsToDisplay = 8 - mistakesLeft;
+        hangmanParts.forEach((part, index) => {
+            part.style.display = index < partsToDisplay ? 'block' : 'none';
+        });
+    }
+
+    function checkWin() {
+        if (!wordDisplay.textContent.includes('_')) {
+            currentScore = 10;
+            messageDisplay.textContent = `¡Ganaste! 🎉 Calificación: ${currentScore}`;
+            messageDisplay.className = 'juego-ahorcado__mensaje juego-ahorcado__mensaje--ganador';
+            disableLetters();
+            // Guarda la calificación en Firestore
+            const user = auth.currentUser;
+            if (user) {
+                saveTestScore(user.uid, 'JUEGOS', currentScore);
+            }
+        }
+    }
+
+    function checkLose() {
+        if (mistakesLeft <= 0) {
+            currentScore = 0;
+            messageDisplay.textContent = `¡Perdiste! 😭 La palabra era: ${secretWord}. Calificación: ${currentScore}`;
+            messageDisplay.className = 'juego-ahorcado__mensaje juego-ahorcado__mensaje--perdedor';
+            updateHangman();
+            disableLetters();
+            // Guarda la calificación en Firestore
+            const user = auth.currentUser;
+            if (user) {
+                saveTestScore(user.uid, 'JUEGOS', currentScore);
+            }
+        }
+    }
+
+    function disableLetter(letterButton, correct) {
+        letterButton.disabled = true;
+        letterButton.classList.add(correct ? 'juego-ahorcado__letra--correcta' : 'juego-ahorcado__letra--incorrecta');
+    }
+
+    function disableLetters() {
+        document.querySelectorAll('.juego-ahorcado__letras button').forEach(button => {
+            button.disabled = true;
+        });
+    }
+    
+    function enableLetters() {
+        document.querySelectorAll('.juego-ahorcado__letras button').forEach(button => {
+            button.disabled = false;
+            button.className = 'juego-ahorcado__letra';
+        });
+    }
+    
+    function generateLetters() {
+        lettersContainer.innerHTML = '';
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        for (const letter of alphabet) {
+            const button = document.createElement('button');
+            button.textContent = letter;
+            button.className = 'juego-ahorcado__letra';
+            button.addEventListener('click', handleGuess);
+            lettersContainer.appendChild(button);
+        }
+
+        console.log('Letras generadas para el juego del ahorcado.');
+    }
+
+    function handleGuess(event) {
+        if (unitSelector.value === 'none') return;
+        
+        const letter = event.target.textContent;
+        if (guessedLetters.includes(letter)) {
+            return;
+        }
+        guessedLetters.push(letter);
+        const correctGuess = secretWord.includes(letter);
+        disableLetter(event.target, correctGuess);
+
+        if (correctGuess) {
+            updateWordDisplay();
+            checkWin();
+        } else {
+            mistakesLeft--;
+            updateHangman();
+            checkLose();
+        }
+    }
+
+    function resetGame() {
+        const selectedUnit = unitSelector.value;
+        if (selectedUnit === 'none') {
+            subtitulo.textContent = 'Selecciona una opción para empezar.';
+            wordDisplay.textContent = '';
+            messageDisplay.textContent = '';
+            disableLetters();
+            hangmanParts.forEach(part => part.style.display = 'none');
+            return;
+        }
+        
+        enableLetters();
+        subtitulo.textContent = '¡Adivina la palabra!';
+        const wordsForUnit = unitWords[selectedUnit] || [];
+        secretWord = wordsForUnit[(Math.random() * wordsForUnit.length) | 0].toUpperCase();
+        guessedLetters = [];
+        mistakesLeft = 6;
+        currentScore = 0;
+        messageDisplay.textContent = '';
+        messageDisplay.className = 'juego-ahorcado__mensaje';
+        updateWordDisplay();
+        updateHangman();
+    }
+    
+    // Nueva lógica de inicialización. Primero genera las letras y luego
+    // espera a que el usuario seleccione una unidad.
+    generateLetters();
+    unitSelector.addEventListener('change', resetGame);
+    
+    if (restartButton) {
+        restartButton.addEventListener('click', () => {
+            unitSelector.value = 'none';
+            resetGame();
+        });
+    }
+
+}
     // Autenticación y eventos
     onAuthStateChanged(auth, (user) => {
         if (user) {
@@ -521,4 +976,3 @@ const audioBtnUT1 = document.getElementById('audio-ut1');
 
 
 };
-

@@ -41,6 +41,17 @@
                     </div>
                 </div>
                 <div id="main-content" class="seccion-contenido">
+                    <section id="hangman-section" class="seccion-unidad seccion-unidad--oculta">
+                        <h2 class="tarjeta-leccion__titulo">Juego de Ahorcado</h2>
+                        <div id="hangman-game">
+                            <p id="hangman-word"></p>
+                            <div id="hangman-letters"></div>
+                            <button id="hangman-guess-button">Adivinar</button>
+                            <input type="text" id="hangman-letter-input" maxlength="1"
+                                placeholder="Ingresa una letra" />
+                            <p id="hangman-message"></p>
+                        </div>
+                    </section>
                     <h1 class="seccion-contenido__titulo">Selecciona una unidad</h1>
                     <p class="seccion-contenido__subtitulo">Usa el menú lateral para comenzar a aprender y practicar.
                     </p>
@@ -50,13 +61,29 @@
                     </div>
                 </div>
             </section>
+            <section id="grades-section" class="seccion-unidad seccion-unidad--oculta">
+                <div class="tarjeta-leccion">
+                    <h2 class="tarjeta-leccion__titulo">Calificaciones por Unidad</h2>
+                    <table class="tabla-calificaciones">
+                        <thead>
+                            <tr>
+                                <th>Unidad</th>
+                                <th>Puntaje más alto</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grades-table-body"></tbody>
+                    </table>
+                </div>
+            </section>
             <!-- Secciones de las unidades: el contenido se mantiene pero los tests ahora están en todas las unidades -->
             <section id="unit-UT1" class="seccion-unidad seccion-unidad--oculta">
                 <!-- Ejemplo para todas las unidades, pon esto dentro de cada <section id="unit-UTx" ...> -->
-<div class="audio-controls">
-    <button id="audio-ut1" class="boton-audio">🔊 Escuchar palabras y oraciones</button>
-    <button id="audio-stop-ut1" class="boton-audio boton-audio--stop">⏹️ Detener audio</button>
-</div>
+                <div class="audio-controls">
+                    <button id="audio-play-ut1" class="boton-audio">▶️ Reproducir</button>
+                    <button id="audio-pause-ut1" class="boton-audio boton-audio--pause">⏸️ Pausar</button>
+                    <button id="audio-stop-ut1" class="boton-audio boton-audio--stop">⏹️ Parar</button>
+                </div>
                 <div class="tarjeta-leccion">
                     <h2 class="tarjeta-leccion__titulo">Lección: To Be & Greetings</h2>
                     <p class="tarjeta-leccion__texto">Aprende a usar el verbo "To Be" y los saludos básicos. Ejercicios
@@ -72,8 +99,8 @@
                     </ul>
                 </div>
                 <!-- Ejemplo dentro de la sección de vocabulario o lección -->
-             
-              
+
+
                 <div class="tarjeta-vocabulario">
                     <h2 class="tarjeta-vocabulario__titulo">Vocabulario Básico</h2>
                     <ul>
@@ -95,11 +122,17 @@
                             referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                     </div>
                 </div>
-                <div class="tarjeta-ejercicios">
+
+                <!--     <div class="tarjeta-ejercicios">
                     <h2 class="tarjeta-ejercicios__titulo">Ejercicio de escritura</h2>
                     <p class="tarjeta-ejercicios__texto">Escribe una presentación usando "To Be".</p>
                     <input type="text" class="seccion-habilidad__input" placeholder="Ej: I am Juan.">
-                </div>
+                </div>  -->
+
+
+                <!-- Nueva sección para el corrector de oraciones -->
+
+
                 <div class="tarjeta-actividad">
                     <h3 class="tarjeta-actividad__subtitulo">Test: Verdadero o Falso</h3>
                     <div id="quiz-container-UT1" class="contenedor-quiz">
@@ -115,10 +148,11 @@
             <!-- Repite la estructura para UT2 a UT6, cambiando el contenido y el test -->
             <section id="unit-UT2" class="seccion-unidad seccion-unidad--oculta">
                 <!-- Ejemplo para todas las unidades, pon esto dentro de cada <section id="unit-UTx" ...> -->
-<div class="audio-controls">
-    <button id="audio-ut2" class="boton-audio">🔊 Escuchar palabras y oraciones</button>
-    <button id="audio-stop-ut2" class="boton-audio boton-audio--stop">⏹️ Detener audio</button>
-</div>
+                <div class="audio-controls">
+                    <button id="audio-play-ut2" class="boton-audio">▶️ Reproducir</button>
+                    <button id="audio-pause-ut2" class="boton-audio boton-audio--pause">⏸️ Pausar</button>
+                    <button id="audio-stop-ut2" class="boton-audio boton-audio--stop">⏹️ Parar</button>
+                </div>
                 <div class="tarjeta-leccion">
                     <h2 class="tarjeta-leccion__titulo">Lección: People and Places</h2>
                     <p class="tarjeta-leccion__texto">Describe personas y lugares usando adjetivos posesivos.</p>
@@ -135,7 +169,7 @@
                         <li>Father: Padre</li>
                         <li>Dad: Papá</li>
                         <li>Mother: Madre</li>
-                         <li>Mom: Mamá</li>
+                        <li>Mom: Mamá</li>
                         <li>Brother: Hermano</li>
                         <li>Sister: Hermana</li>
                         <li>Son: Hijo</li>
@@ -163,10 +197,11 @@
 
             <section id="unit-UT3" class="seccion-unidad seccion-unidad--oculta">
                 <!-- Ejemplo para todas las unidades, pon esto dentro de cada <section id="unit-UTx" ...> -->
-<div class="audio-controls">
-    <button id="audio-ut3" class="boton-audio">🔊 Escuchar palabras y oraciones</button>
-    <button id="audio-stop-ut3" class="boton-audio boton-audio--stop">⏹️ Detener audio</button>
-</div>
+                <div class="audio-controls">
+                    <button id="audio-play-ut13" class="boton-audio">▶️ Reproducir</button>
+                    <button id="audio-pause-ut3" class="boton-audio boton-audio--pause">⏸️ Pausar</button>
+                    <button id="audio-stop-ut3" class="boton-audio boton-audio--stop">⏹️ Parar</button>
+                </div>
                 <div class="tarjeta-leccion">
                     <h2 class="tarjeta-leccion__titulo">Lección: Daily Life</h2>
                     <p class="tarjeta-leccion__texto">Rutinas diarias y adverbios de frecuencia.</p>
@@ -207,10 +242,11 @@
 
             <section id="unit-UT4" class="seccion-unidad seccion-unidad--oculta">
                 <!-- Ejemplo para todas las unidades, pon esto dentro de cada <section id="unit-UTx" ...> -->
-<div class="audio-controls">
-    <button id="audio-ut4" class="boton-audio">🔊 Escuchar palabras y oraciones</button>
-    <button id="audio-stop-ut4" class="boton-audio boton-audio--stop">⏹️ Detener audio</button>
-</div>
+                <div class="audio-controls">
+                    <button id="audio-play-ut4" class="boton-audio">▶️ Reproducir</button>
+                    <button id="audio-pause-ut4" class="boton-audio boton-audio--pause">⏸️ Pausar</button>
+                    <button id="audio-stop-ut4" class="boton-audio boton-audio--stop">⏹️ Parar</button>
+                </div>
                 <div class="tarjeta-leccion">
                     <h2 class="tarjeta-leccion__titulo">Lección: Foods and Drinks</h2>
                     <p class="tarjeta-leccion__texto">Aprende vocabulario sobre comidas y bebidas.</p>
@@ -248,10 +284,11 @@
 
             <section id="unit-UT5" class="seccion-unidad seccion-unidad--oculta">
                 <!-- Ejemplo para todas las unidades, pon esto dentro de cada <section id="unit-UTx" ...> -->
-<div class="audio-controls">
-    <button id="audio-ut5" class="boton-audio">🔊 Escuchar palabras y oraciones</button>
-    <button id="audio-stop-ut5" class="boton-audio boton-audio--stop">⏹️ Detener audio</button>
-</div>
+                <div class="audio-controls">
+                    <button id="audio-play-ut5" class="boton-audio">▶️ Reproducir</button>
+                    <button id="audio-pause-ut5" class="boton-audio boton-audio--pause">⏸️ Pausar</button>
+                    <button id="audio-stop-ut5" class="boton-audio boton-audio--stop">⏹️ Parar</button>
+                </div>
                 <div class="tarjeta-leccion">
                     <h2 class="tarjeta-leccion__titulo">Lección: Things I Have</h2>
                     <p class="tarjeta-leccion__texto">Vocabulario de objetos personales y posesión.</p>
@@ -291,10 +328,11 @@
 
             <section id="unit-UT6" class="seccion-unidad seccion-unidad--oculta">
                 <!-- Ejemplo para todas las unidades, pon esto dentro de cada <section id="unit-UTx" ...> -->
-<div class="audio-controls">
-    <button id="audio-ut6" class="boton-audio">🔊 Escuchar palabras y oraciones</button>
-    <button id="audio-stop-ut6" class="boton-audio boton-audio--stop">⏹️ Detener audio</button>
-</div>
+                <div class="audio-controls">
+                    <button id="audio-play-ut6" class="boton-audio">▶️ Reproducir</button>
+                    <button id="audio-pause-ut6" class="boton-audio boton-audio--pause">⏸️ Pausar</button>
+                    <button id="audio-stop-ut6" class="boton-audio boton-audio--stop">⏹️ Parar</button>
+                </div>
                 <div class="tarjeta-leccion">
                     <h2 class="tarjeta-leccion__titulo">Lección: Around Town - Free Time</h2>
                     <p class="tarjeta-leccion__texto">Lugares en la ciudad y actividades de tiempo libre.</p>
@@ -323,27 +361,111 @@
                         <p class="contenedor-quiz__pregunta" id="question-UT6"></p>
                         <div class="contenedor-quiz__botones">
                             <button class="boton-quiz boton-quiz--verdadero" data-answer="true">Verdadero</button>
-                            <button class="boton-quiz boton-quiz--falso" data-answer="false">Falso</button>
+                            <button class="boton-quiz boton-quiz--falso" data-answer="false">False</button>
                         </div>
                         <p id="feedback-UT6" class="contenedor-quiz__retroalimentacion"></p>
                     </div>
                 </div>
             </section>
-            <section id="grades-section" class="seccion-unidad seccion-unidad--oculta">
-                <div class="tarjeta-leccion">
-                    <h2 class="tarjeta-leccion__titulo">Calificaciones por Unidad</h2>
-                    <table class="tabla-calificaciones">
-                        <thead>
-                            <tr>
-                                <th>Unidad</th>
-                                <th>Puntaje más alto</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="grades-table-body"></tbody>
-                    </table>
+
+            <!-- EXAMEN 1: FIRST TERM EXAMEN - Solo test -->
+            <section id="unit-EXAM1" class="seccion-unidad seccion-unidad--oculta">
+                <div class="tarjeta-actividad">
+                    <h2 class="tarjeta-actividad__subtitulo">FIRST TERM EXAMEN</h2>
+                    <p class="tarjeta-actividad__texto">Examen del primer término - Unidades 1-3</p>
+                    <div id="quiz-container-EXAM1" class="contenedor-quiz">
+                        <p class="contenedor-quiz__pregunta" id="question-EXAM1"></p>
+                        <div class="contenedor-quiz__botones-vertical">
+                            <button class="boton-quiz boton-quiz--verdadero" data-answer="true">Verdadero</button>
+                            <button class="boton-quiz boton-quiz--falso" data-answer="false">Falso</button>
+                        </div>
+                        <p id="feedback-EXAM1" class="contenedor-quiz__retroalimentacion"></p>
+                    </div>
                 </div>
             </section>
+
+            <!-- EXAMEN 2: SECOND TERM EXAMEN - Solo test -->
+            <section id="unit-EXAM2" class="seccion-unidad seccion-unidad--oculta">
+                <div class="tarjeta-actividad">
+                    <h2 class="tarjeta-actividad__subtitulo">SECOND TERM EXAMEN</h2>
+                    <p class="tarjeta-actividad__texto">Examen del segundo término - Unidades 4-6</p>
+                    <div id="quiz-container-EXAM2" class="contenedor-quiz">
+                        <p class="contenedor-quiz__pregunta" id="question-EXAM2"></p>
+                        <div class="contenedor-quiz__botones-vertical">
+                            <button class="boton-quiz boton-quiz--verdadero" data-answer="true">Verdadero</button>
+                            <button class="boton-quiz boton-quiz--falso" data-answer="false">Falso</button>
+                        </div>
+                        <p id="feedback-EXAM2" class="contenedor-quiz__retroalimentacion"></p>
+                    </div>
+                </div>
+            </section>
+
+
+<section id="unit-JUEGOS" class="seccion-unidad seccion-unidad--oculta">
+    <div class="tarjeta-leccion">
+        <h2 class="juego-ahorcado__titulo">Juego del Ahorcado</h2>
+        <p id="subtitulo" class="juego-ahorcado__subtitulo">Selecciona una opción para empezar.</p>
+        <div class="juego-ahorcado__selector-unidad">
+            <label for="unit-selector">Elige una unidad:</label>
+            <select id="unit-selector">
+                <option value="none">Seleccione una opción</option>
+                <option value="UT1">UT1 - Greetings</option>
+                <option value="UT2">UT2 - People & Places</option>
+                <option value="UT3">UT3 - Daily Life</option>
+                <option value="UT4">UT4 - Foods & Drinks</option>
+                <option value="UT5">UT5 - Things I Have</option>
+                <option value="UT6">UT6 - Free Time</option>
+            </select>
+        </div>
+        <div class="juego-ahorcado__contenido">
+            <div class="juego-ahorcado__figura">
+                <div class="base-ahorcado parte-ahorcado"></div>
+                <div class="poste-ahorcado parte-ahorcado"></div>
+                <div class="barra-superior parte-ahorcado"></div>
+                <div class="cuerda-ahorcado parte-ahorcado"></div>
+                <div class="cabeza-ahorcado parte-ahorcado"></div>
+                <div class="cuerpo-ahorcado parte-ahorcado"></div>
+                <div class="brazo-izquierdo parte-ahorcado"></div>
+                <div class="brazo-derecho parte-ahorcado"></div>
+                <div class="pierna-izquierda parte-ahorcado"></div>
+                <div class="pierna-derecha parte-ahorcado"></div>
+            </div>
+            <div class="juego-ahorcado__interfaz">
+                <div id="hangman-word" class="juego-ahorcado__palabra"></div>
+                <p id="hangman-message" class="juego-ahorcado__mensaje"></p>
+                <p id="hangman-score" class="juego-ahorcado__puntaje"></p>
+                <div id="hangman-letters" class="juego-ahorcado__letras"></div>
+                <button id="hangman-restart-button" class="juego-ahorcado__boton-reiniciar">Reiniciar Juego</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+            <section id="unit-WRITING" class="seccion-unidad seccion-unidad--oculta">
+                <div class="tarjeta-leccion">
+                    <h2 class="tarjeta-leccion__titulo">Práctica de Escritura</h2>
+                    <p class="tarjeta-leccion__texto">Escribe una oración en inglés y la IA de Gemini la corregirá por
+                        ti.</p>
+                    <div class="form-group">
+                        <label for="sentenceInput" class="input-label">Escribe tu oración aquí:</label>
+                        <textarea id="sentenceInput" rows="4" class="input-field"
+                            placeholder="Ej: The cat sat on the table."></textarea>
+                    </div>
+                    <button id="correctButton" class="action-button">Verificar Oración</button>
+                    <div id="alertPlaceholder"></div>
+                    <div id="feedbackContainer" class="feedback-container hidden">
+                        <div id="loadingIndicator" class="loading-indicator hidden">
+                            <div class="loading-spinner"></div>
+                            <span class="loading-text">Analizando...</span>
+                        </div>
+                        <div id="feedbackContent" class="feedback-content"></div>
+                    </div>
+                </div>
+            </section>
+
+
+        
 
         </main>
     </div>

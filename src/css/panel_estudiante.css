@@ -52,7 +52,7 @@
                 width: 18rem;
                 position: sticky;
                 top: 0;
-                height: 100vh;
+                min-height: 100vh;
                 align-items: flex-start;
             }
         }
@@ -258,7 +258,10 @@
         .tarjeta-leccion__titulo,
         .tarjeta-vocabulario__titulo,
         .tarjeta-ejercicios__titulo,
-        .tarjeta-actividad__titulo {
+        .tarjeta-actividad__titulo,
+        .tarjeta-video__titulo,
+        .main-title
+         {
             font-size: 1.25rem;
             font-weight: 600;
             color: #1F2937;
@@ -298,6 +301,17 @@
         .contenedor-quiz__botones {
             display: flex;
             gap: 1rem;
+        }
+
+        .contenedor-quiz__botones-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .contenedor-quiz__botones-vertical .boton-quiz {
+            width: 100%;
+            text-align: center;
         }
 
         .boton-quiz {
@@ -597,32 +611,7 @@ overflow: hidden;
   
 }
 
-.boton-audio {
-    background: #3182ce;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 8px 16px;
-    margin: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-.boton-audio:hover {
-    background: #2b6cb0;
-}
-.boton-audio--stop {
-    background: #e53e3e;
-}
-.boton-audio--stop:hover {
-    background: #c53030;
-}
-.audio-controls {
-    margin: 12px 0;
-}
+
 
 .quiz-notification {
     position: fixed;
@@ -659,3 +648,601 @@ overflow: hidden;
     80% { transform: translateX(-50%) scale(1.1);}
     100% { transform: translateX(-50%) scale(1);}
 }
+
+
+ .boton-audio {
+    background: #3182ce;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    margin: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.boton-audio:first-child:hover {
+    background: #2c6fb2
+}
+.boton-audio--pause {
+    background: #f6ad55;
+}
+.boton-audio--pause:hover {
+    background: #ed8936;
+}
+.boton-audio--stop {
+     background: #e53e3e;
+     
+    /* background: #718096; */
+}
+.boton-audio--stop:hover {
+    background: #c53030;
+}
+.boton-audio--playing {
+    background: #38a169 !important;
+}
+.boton-audio--resume {
+   /*  background: #3182ce !important; */
+        background: #f6ad55;
+}
+.boton-audio:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.audio-controls {
+    margin: 12px 0;
+}
+
+
+ /* Contenedor principal de la aplicación */
+        .app-container {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            
+            width: 100%;
+            max-width: 42rem;
+            margin: auto;
+            margin-bottom: 2rem;
+
+        }
+
+        /* Media queries para responsividad */
+        @media (min-width: 768px) {
+            .app-container {
+                padding: 2rem;
+                max-width: 800px;
+               
+               
+            }
+
+
+
+        }
+
+        /* Títulos y subtítulos */
+       /*  .main-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            text-align: left;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+        } */
+
+        .main-title {
+            margin-top: 2rem;
+        }
+        .sub-title {
+            text-align: center;
+            color: #4b5563;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Campos de formulario */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-label {
+            display: block;
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+        }
+
+        /* Botón de acción */
+        .action-button {
+            width: 100%;
+            background-color: #2563eb;
+            color: #ffffff;
+            font-weight: 700;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s, box-shadow 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .action-button:hover {
+            background-color: #1d4ed8;
+        }
+
+        .action-button:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #3b82f6;
+        }
+
+        /* Contenedor de retroalimentación */
+        .feedback-container {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: #f9fafb;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+        }
+
+       
+
+        .feedback-content > *:not(:last-child) {
+            margin-bottom: 1rem;
+        }
+
+        /* Indicador de carga (spinner) */
+        .loading-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-spinner {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 9999px;
+            border: 4px solid #e5e7eb;
+            border-top-color: #3b82f6;
+            animation: spin 1s linear infinite;
+        }
+ .hidden {
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-left: 1rem;
+            color: #6b7280;
+        }
+
+        /* Mensajes de retroalimentación */
+        .feedback-message {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .feedback-message--correct {
+            color: #16a34a;
+        }
+
+        .feedback-message--incorrect {
+            color: #dc2626;
+        }
+
+        .feedback-message__icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            margin-right: 0.5rem;
+        }
+
+        .feedback-explanation {
+            margin-top: 0.5rem;
+            color: #4b5563;
+        }
+
+        .corrected-section {
+            margin-top: 1rem;
+        }
+
+        .corrected-text {
+            color: #2563eb;
+            font-style: italic;
+            font-weight: 500;
+            margin-top: 0.25rem;
+        }
+
+        .explanation-section {
+            margin-top: 1rem;
+        }
+
+        .explanation-text {
+            color: #4b5563;
+            margin-top: 0.25rem;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-weight: 500;
+        }
+
+        .error-detail {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .alert-message {
+            padding: 1rem;
+            background-color: #fca5a5;
+            color: #b91c1c;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        
+
+            .juego-ahorcado {
+            text-align: center;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .juego-ahorcado__titulo {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .juego-ahorcado__subtitulo {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .juego-ahorcado__selector-unidad {
+            margin-bottom: 15px;
+        }
+        
+        .juego-ahorcado__selector-unidad label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #555;
+            margin-right: 8px;
+        }
+        
+        .juego-ahorcado__selector-unidad select {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .juego-ahorcado__selector-unidad select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        .juego-ahorcado__contenido {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .juego-ahorcado__figura {
+            position: relative;
+            width: 180px;
+            height: 220px;
+            background-color: transparent;
+        }
+
+        .parte-ahorcado {
+            position: absolute;
+            background-color: #555;
+            border-radius: 4px;
+            display: none;
+        }
+
+        /* Base */
+        .base-ahorcado {
+            width: 160px;
+            height: 12px;
+            bottom: 0;
+            left: 10px;
+        }
+
+        /* Poste */
+        .poste-ahorcado {
+            width: 12px;
+            height: 180px;
+            bottom: 12px;
+            left: 25px;
+        }
+
+        /* Barra superior */
+        .barra-superior {
+            width: 100px;
+            height: 12px;
+            top: 10px;
+            left: 25px;
+        }
+
+        /* Cuerda */
+        .cuerda-ahorcado {
+            width: 4px;
+            height: 35px;
+            top: 10px;
+            left: 120px;
+            background-color: #888;
+        }
+
+        /* Cabeza */
+        .cabeza-ahorcado {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 4px solid #555;
+            top: 45px;
+            left: 105px;
+            background-color: #fff;
+        }
+
+        /* Cuerpo */
+        .cuerpo-ahorcado {
+            width: 7px;
+            height: 60px;
+            top: 85px;
+            left: 120px;
+        }
+
+        /* Brazos */
+        .brazo-izquierdo,
+        .brazo-derecho {
+            width: 50px;
+            height: 7px;
+            top: 95px;
+            background-color: #555;
+            border-radius: 4px;
+        }
+
+        .brazo-izquierdo {
+            left: 75px;
+            transform: rotate(45deg);
+        }
+
+        .brazo-derecho {
+            left: 125px;
+            transform: rotate(-45deg);
+        }
+
+        /* Piernas */
+        .pierna-izquierda,
+        .pierna-derecha {
+            width: 50px;
+            height: 7px;
+            top: 150px;
+            background-color: #555;
+            border-radius: 4px;
+        }
+
+        .pierna-izquierda {
+            left: 90px;
+            transform: rotate(-45deg);
+        }
+
+        .pierna-derecha {
+            left: 125px;
+            transform: rotate(45deg);
+        }
+
+        .juego-ahorcado__interfaz {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .juego-ahorcado__palabra {
+            letter-spacing: 0.6rem;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .juego-ahorcado__mensaje {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            min-height: 1.5rem;
+        }
+
+        .juego-ahorcado__mensaje--ganador {
+            color: #28a34a;
+        }
+
+        .juego-ahorcado__mensaje--perdedor {
+            color: #dc2626;
+        }
+        
+        .juego-ahorcado__puntaje {
+            display: none;
+        }
+
+        .juego-ahorcado__letras {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(35px, 1fr));
+            gap: 8px;
+            justify-content: center;
+            margin-top: 15px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .juego-ahorcado__letra {
+            width: 100%;
+            height: 35px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            background-color: #eee;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .juego-ahorcado__letra:hover:not(:disabled) {
+            background-color: #ddd;
+            border-color: #bbb;
+        }
+
+        .juego-ahorcado__letra:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .juego-ahorcado__letra--correcta {
+            background-color: #28a745;
+            color: #fff;
+            border-color: #28a745;
+        }
+
+        .juego-ahorcado__letra--incorrecta {
+            background-color: #dc3545;
+            color: #fff;
+            border-color: #dc3545;
+        }
+
+        .juego-ahorcado__boton-reiniciar {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .juego-ahorcado__boton-reiniciar:hover {
+            background-color: #0056b3;
+        }
+
+        /* ==========================================================================
+           Media Query para Tabletas y Escritorio
+           ========================================================================== */
+        @media (min-width: 768px) {
+           /*  body {
+                padding: 40px;
+            } */
+            
+            .juego-ahorcado {
+                padding: 40px;
+            }
+
+            .juego-ahorcado__titulo {
+                font-size: 2.5rem;
+            }
+
+            .juego-ahorcado__subtitulo {
+                font-size: 1.4rem;
+            }
+            
+            .juego-ahorcado__selector-unidad {
+                margin-bottom: 20px;
+            }
+            
+            .juego-ahorcado__selector-unidad select {
+                padding: 8px 12px;
+                font-size: 1rem;
+            }
+
+            .juego-ahorcado__contenido {
+                flex-direction: row;
+                justify-content: space-around;
+                align-items: flex-start;
+                gap: 20px;
+               
+            }
+
+            .juego-ahorcado__figura {
+                width: 200px;
+                height: 250px;
+                margin-right: 5rem;
+            }
+            
+            /* Ajustes para la figura del ahorcado en pantallas grandes */
+            .base-ahorcado { width: 180px; height: 15px; }
+            .poste-ahorcado { width: 15px; height: 200px; }
+            .barra-superior { width: 120px; height: 15px; }
+            .cuerda-ahorcado { width: 5px; height: 40px; top: 15px; left: 140px; }
+            .cabeza-ahorcado { width: 40px; height: 40px; border: 5px solid #555; top: 55px; left: 120px; }
+            .cuerpo-ahorcado { width: 8px; height: 70px; top: 100px; left: 142px; }
+            .brazo-izquierdo, .brazo-derecho { width: 60px; height: 8px; top: 110px; }
+            .brazo-izquierdo { left: 85px; }
+            .brazo-derecho { left: 145px; }
+            .pierna-izquierda, .pierna-derecha { width: 60px; height: 8px; top: 170px; }
+            .pierna-izquierda { left: 105px; }
+            .pierna-derecha { left: 145px; }
+            
+            .juego-ahorcado__palabra {
+                letter-spacing: 0.8rem;
+                font-size: 2.2rem;
+            }
+
+            .juego-ahorcado__mensaje {
+                font-size: 1.5rem;
+            }
+
+            .juego-ahorcado__letras {
+                grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+                gap: 10px;
+            }
+
+            .juego-ahorcado__letra {
+                height: 40px;
+                font-size: 1.2rem;
+            }
+            
+            .juego-ahorcado__boton-reiniciar {
+                padding: 12px 24px;
+                font-size: 1.1rem;
+            }
+        }
