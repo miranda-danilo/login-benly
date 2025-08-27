@@ -370,6 +370,7 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
     const unitList = document.getElementById('unit-list');
     const mainContent = document.getElementById('main-content');
     const unitSections = document.querySelectorAll('.seccion-unidad');
+    const MobileUnitList = document.getElementById('mobile-unit-list');
     const gradesTab = document.getElementById('grades-tab');
     const gradesSection = document.getElementById('grades-section');
     let userScores = {};
@@ -435,7 +436,9 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
         const userRef = doc(db, `usuarios/${userId}`);
         onSnapshot(userRef, (docSnap) => {
             userScores = docSnap.exists() && docSnap.data().scores ? docSnap.data().scores : {};
-            updateUnitCompletionStatus();
+            updateUnitCompletionStatus(unitList); // <-- PASA EL UL como parámetro
+            updateUnitCompletionStatus(MobileUnitList); // <-- También actualiza el menú móvil si está visible
+            console.log("actualizando estado de unidades...");
         });
     };
 
@@ -464,8 +467,28 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
         }
     };
 
+
+
+    function updateUnitCompletionStatus(container) {
+    if (!container) {
+     console.error("Container is null");
+        return;
+    };
+    const links = container.querySelectorAll('.unidad-link');
+    links.forEach(link => {
+        const unitId = link.dataset.unitId;
+        const scoreData = userScores[unitId];
+        if (scoreData && scoreData.completada) {
+            console.log(`Marking unit ${unitId} as completed`);
+            link.classList.add('unidad-link--completada');
+        } else {
+            link.classList.remove('unidad-link--completada');
+        }
+    });
+}
+
     // Actualiza el menú lateral según puntaje
-    const updateUnitCompletionStatus = () => {
+/*      const updateUnitCompletionStatus = () => {
         const links = unitList.querySelectorAll('.unidad-link');
         links.forEach(link => {
             const unitId = link.dataset.unitId;
@@ -476,7 +499,23 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
                 link.classList.remove('unidad-link--completada');
             }
         });
-    };
+    }; 
+ */
+
+  /*   const updateUnitCompletionStatus = (container) => {
+    if (!container) return;
+    const links = container.querySelectorAll('.unidad-link');
+    links.forEach(link => {
+        const unitId = link.dataset.unitId;
+        const scoreData = userScores[unitId];
+        if (scoreData && scoreData.completada) {
+            link.classList.add('unidad-link--completada');
+        } else {
+            link.classList.remove('unidad-link--completada');
+        }
+    });
+};
+ */
 
     // Renderiza contenido de unidad y test
 
@@ -945,4 +984,72 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
     }
 
 
+// --- Menú móvil hamburguesa ---
+
+    // --- Menú móvil "Módulos" ---
+
+   const hamburgerBtn = document.getElementById('mobile-hamburger-btn');
+   const hamburgerMenu = document.getElementById('mobile-hamburger-menu');
+    
+
+    // Unidades y calificaciones
+    const units = [
+        { id: 'UT1', title: 'Introduction and Basic Greetings' },
+        { id: 'UT2', title: 'People and Places' },
+        { id: 'UT3', title: 'Daily Life' },
+        { id: 'UT4', title: 'Foods and Drinks' },
+        { id: 'UT5', title: 'Things I Have' },
+        { id: 'UT6', title: 'Around Town - Free Time' },
+        { id: 'WRITING', title: 'Práctica de Escritura' },
+        { id: 'EXAM1', title: 'FIRST TERM EXAMEN' },
+        { id: 'EXAM2', title: 'SECOND TERM EXAMEN' }
+    ];
+
+    function renderHamburgerMenu() {
+        MobileUnitList.innerHTML = '';
+        // Unidades
+        units.forEach(unit => {
+            const li = document.createElement('li');
+            li.innerHTML = `<a href="#" data-unit-id="${unit.id}" class="unidad-link">${unit.title}</a>`;
+            MobileUnitList.appendChild(li);
+            li.querySelector('a').addEventListener('click', (e) => {
+                e.preventDefault();
+                hamburgerMenu.style.display = "none";
+                hamburgerBtn.style.display = "flex";
+                // Renderiza la unidad (ajusta si tienes función global)
+               /*TODO */
+                    renderUnitContent(unit.id);
+                
+            });
+        });
+        // Calificaciones
+        const gradesLi = document.createElement('li');
+        gradesLi.innerHTML = `<a href="#" id="hamburger-grades-tab" class="unidad-link unidad-link--calificaciones">Calificaciones</a>`;
+        MobileUnitList.appendChild(gradesLi);
+        gradesLi.querySelector('a').addEventListener('click', (e) => {
+            e.preventDefault();
+            hamburgerMenu.style.display = "none";
+            hamburgerBtn.style.display = "flex";
+             /*TODO */
+                renderGradesSection();
+          
+        });
+         updateUnitCompletionStatus(MobileUnitList);
+    }
+
+    // Mostrar menú al pulsar el botón
+    hamburgerBtn.addEventListener('click', () => {
+        renderHamburgerMenu(); // Rellena menú SIEMPRE antes de mostrar
+        hamburgerMenu.style.display = "flex";
+        hamburgerBtn.style.display = "none";
+    });
+
+    // Cerrar menú si se pulsa fuera del panel
+    hamburgerMenu.addEventListener('click', (e) => {
+        if (e.target === hamburgerMenu) {
+            hamburgerMenu.style.display = "none";
+            hamburgerBtn.style.display = "flex";
+        }
+    });
 };
+
