@@ -115,72 +115,164 @@ const quizData = {
 
 
 export const setupUserPanelLogic = (panelElement, userRole) => {
-    
- const sentenceInput = document.getElementById('sentenceInput');
+
+    const sentenceInput = document.getElementById('sentenceInput');
+    const correctButton = document.getElementById('correctButton');
+    const feedbackContainer = document.getElementById('feedbackContainer');
+    const feedbackContent = document.getElementById('feedbackContent');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const alertPlaceholder = document.getElementById('alertPlaceholder');
+
+    // Función para mostrar mensajes de alerta
+    const showAlert = (message) => {
+        alertPlaceholder.innerHTML = `<div class="alert-message">${message}</div>`;
+    };
+
+
+
+
+    // Función para realizar la llamada a la API con reintentos y retroceso exponencial
+    async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
+        try {
+            const response = await fetch(url, options);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            if (retries > 0) {
+                await new Promise(res => setTimeout(res, delay));
+                return fetchWithRetry(url, options, retries - 1, delay * 2);
+            } else {
+                throw error;
+            }
+        }
+    }
+
+    // Sonidos
+        const playSound = (type) => {
+            let audio;
+            if (type === "correct") {
+                audio = new Audio("assets/correct-ding.mp3");
+            } else if (type === "wrong") {
+                audio = new Audio("assets/chicharra-error-incorrecto-.mp3");
+            } else if (type === "win") {
+                audio = new Audio("assets/bites-ta-da-winner.mp3");
+            } else if (type === "fail") {
+                audio = new Audio("assets/computers-critical-error-windows.mp3");
+            }
+            if (audio) audio.play();
+        };
+
+    correctButton.addEventListener('click', async () => {
+        // --- LÓGICA WRITING COMPLETA ---
+        let writingProgress = {
+            correctCount: 0,
+            score: 0
+        };
+
+        /**
+         * Cargar progreso WRITING al abrir la unidad (persistencia)
+         */
+        async function loadWritingProgress(userId) {
+            try {
+                const docRef = doc(db, `usuarios/${userId}`);
+                const docSnap = await getDoc(docRef);
+                const userScores = (docSnap.exists() && docSnap.data().scores) ? docSnap.data().scores : {};
+                const writing = userScores["WRITING"];
+                writingProgress.correctCount = writing && writing.score ? Math.floor(writing.score / 2) : 0;
+                writingProgress.score = writing && writing.score ? writing.score : 0;
+            } catch (e) {
+                writingProgress.correctCount = 0;
+                writingProgress.score = 0;
+            }
+        }
+
+        /**
+         * Guardar puntaje WRITING solo si es mayor al previo.
+         */
+        async function saveWritingScore(userId, score) {
+            try {
+                const docRef = doc(db, `usuarios/${userId}`);
+                const docSnap = await getDoc(docRef);
+                const currentData = docSnap.exists() ? docSnap.data() : {};
+                const currentScores = currentData.scores || {};
+                const prevScore = currentScores["WRITING"]?.score || 0;
+                if (score > prevScore) {
+                    const newScores = {
+                        ...currentScores,
+                        ["WRITING"]: {
+                            score: score,
+                            completada: score >= 10
+                        }
+                    };
+                    await setDoc(docRef, { ...currentData, scores: newScores }, { merge: true });
+                    showMessage("¡Puntaje WRITING guardado!", "success");
+                }
+            } catch (error) {
+                showMessage("Error al guardar WRITING.", "error");
+            }
+        }
+
+        // --- WRITING UI ---
+        const sentenceInput = document.getElementById('sentenceInput');
         const correctButton = document.getElementById('correctButton');
         const feedbackContainer = document.getElementById('feedbackContainer');
         const feedbackContent = document.getElementById('feedbackContent');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const alertPlaceholder = document.getElementById('alertPlaceholder');
 
-        // Función para mostrar mensajes de alerta
-        const showAlert = (message) => {
-            alertPlaceholder.innerHTML = `<div class="alert-message">${message}</div>`;
-        };
-        
         
 
-
-        // Función para realizar la llamada a la API con reintentos y retroceso exponencial
-        async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
-            try {
-                const response = await fetch(url, options);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return await response.json();
-            } catch (error) {
-                if (retries > 0) {
-                    await new Promise(res => setTimeout(res, delay));
-                    return fetchWithRetry(url, options, retries - 1, delay * 2);
-                } else {
-                    throw error;
-                }
-            }
+        // Crea el div para mostrar progreso y puntaje
+        let writingProgressDiv = document.getElementById("writingProgressDiv");
+        if (!writingProgressDiv && feedbackContainer) {
+            writingProgressDiv = document.createElement("div");
+            writingProgressDiv.id = "writingProgressDiv";
+            feedbackContainer.appendChild(writingProgressDiv);
         }
+
+        // Al abrir la unidad WRITING, carga el progreso del usuario
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                await loadWritingProgress(user.uid);
+                writingProgressDiv.innerHTML = `
+            <b>Oraciones correctas:</b> ${writingProgress.correctCount}/5<br>
+            <b>Puntaje:</b> ${writingProgress.score}/10
+            ${writingProgress.correctCount >= 5 ? '<br><span style="color:green;font-weight:bold;">¡Completaste la sección de escritura!</span>' : ''}
+        `;
+            }
+        });
 
         correctButton.addEventListener('click', async () => {
             const sentence = sentenceInput.value.trim();
             if (!sentence) {
-                showAlert('Por favor, escribe una oración para verificar.');
+                alertPlaceholder.innerHTML = '<div class="alert-message">Por favor, escribe una oración para verificar.</div>';
                 return;
             }
 
-            // Ocultar mensajes de alerta anteriores
             alertPlaceholder.innerHTML = '';
-            
-            // Mostrar estado de carga
             feedbackContainer.classList.remove('hidden');
             feedbackContent.classList.add('hidden');
             loadingIndicator.classList.remove('hidden');
 
             try {
-                // El prompt para el modelo Gemini
+                // El prompt para Gemini
                 const prompt = `Actúa como un corrector de oraciones en inglés. Analiza la siguiente oración y determina si es gramaticalmente correcta. Si es correcta, devuelve un JSON con el estado "Correcta". Si es incorrecta, devuelve un JSON con el estado "Incorrecta", la versión corregida de la oración y una explicación clara y concisa de los errores en español.
-                
-                Oración: "${sentence}"
-                
-                Ejemplo de JSON correcto:
-                {
-                    "status": "Correcta"
-                }
-                
-                Ejemplo de JSON incorrecto:
-                {
-                    "status": "Incorrecta",
-                    "corrected_sentence": "The man goes to the store.",
-                    "explanation": "El verbo 'go' debe estar en su forma 'goes' para concordar con el sujeto 'the man' en tercera persona del singular."
-                }`;
+
+        Oración: "${sentence}"
+
+        Ejemplo de JSON correcto:
+        {
+            "status": "Correcta"
+        }
+
+        Ejemplo de JSON incorrecto:
+        {
+            "status": "Incorrecta",
+            "corrected_sentence": "The man goes to the store.",
+            "explanation": "El verbo 'go' debe estar en su forma 'goes' para concordar con el sujeto 'the man' en tercera persona del singular."
+        }`;
 
                 const payload = {
                     contents: [{ role: "user", parts: [{ text: prompt }] }],
@@ -201,63 +293,75 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
                 const apiKey = "AIzaSyDk6yjhp_DZ3gXUob4gID6vKrDLAaD-OGY";
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
-                const response = await fetchWithRetry(apiUrl, {
+                // Puedes usar fetchWithRetry si lo tienes, si no, usa fetch normal
+                const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                
-                const result = response.candidates[0].content.parts[0].text;
+
+                const json = await response.json();
+                const result = json.candidates[0].content.parts[0].text;
                 const parsedResult = JSON.parse(result);
 
-                // Actualizar la interfaz de usuario con el resultado
                 let outputHtml = '';
 
-
-
                 if (parsedResult.status === 'Correcta') {
+
+                    playSound("correct");
+                    writingProgress.correctCount += 1;
+                    if (writingProgress.correctCount > 5) writingProgress.correctCount = 5;
+                    writingProgress.score = Math.min(writingProgress.correctCount * 2, 10);
+
+                    // Guardar progreso y puntaje
+                    const user = auth.currentUser;
+                    if (user) await saveWritingScore(user.uid, writingProgress.score);
+
                     outputHtml = `
-                        <p class="feedback-message feedback-message--correct">
-                            <svg class="feedback-message__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            ¡Correcta!
-                        </p>
-                        <p class="feedback-explanation">Tu oración es gramaticalmente correcta.</p>
-                    `;
+                <p class="feedback-message feedback-message--correct">
+                    <svg class="feedback-message__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    ¡Correcta!
+                </p>
+                <p class="feedback-explanation">Tu oración es gramaticalmente correcta.</p>
+            `;
                 } else {
                     outputHtml = `
-                        <p class="feedback-message feedback-message--incorrect">
-                            <svg class="feedback-message__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            ¡Incorrecta!
-                        </p>
-                        <div class="corrected-section">
-                            <h3 class="input-label">Versión corregida:</h3>
-                            <p class="corrected-text">"${parsedResult.corrected_sentence}"</p>
-                        </div>
-                        <div class="explanation-section">
-                            <h3 class="input-label">Explicación:</h3>
-                            <p class="explanation-text">${parsedResult.explanation}</p>
-                        </div>
-                    `;
+                <p class="feedback-message feedback-message--incorrect">
+                    <svg class="feedback-message__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    ¡Incorrecta!
+                </p>
+                <div class="corrected-section">
+                    <h3 class="input-label">Versión corregida:</h3>
+                    <p class="corrected-text">"${parsedResult.corrected_sentence}"</p>
+                </div>
+                <div class="explanation-section">
+                    <h3 class="input-label">Explicación:</h3>
+                    <p class="explanation-text">${parsedResult.explanation}</p>
+                </div>
+            `;
                 }
 
-               
-                console.log('API Response:', parsedResult);
+                // Mostrar progreso
+                writingProgressDiv.innerHTML = `
+            <b>Oraciones correctas:</b> ${writingProgress.correctCount}/5<br>
+            <b>Puntaje:</b> ${writingProgress.score}/10
+            ${writingProgress.correctCount >= 5 ? '<br><span style="color:green;font-weight:bold;">¡Completaste la sección de escritura!</span>' : ''}
+        `;
 
                 feedbackContent.innerHTML = outputHtml;
             } catch (error) {
-                console.error('Error:', error);
                 feedbackContent.innerHTML = `
-                    <p class="error-message">Ocurrió un error al procesar la solicitud. Por favor, inténtalo de nuevo.</p>
-                    <p class="error-detail">Detalles del error: ${error.message}</p>
-                `;
+            <p class="error-message">Ocurrió un error al procesar la solicitud. Por favor, inténtalo de nuevo.</p>
+            <p class="error-detail">Detalles del error: ${error.message}</p>
+        `;
             } finally {
-                // Ocultar estado de carga y mostrar contenido
                 loadingIndicator.classList.add('hidden');
                 feedbackContent.classList.remove('hidden');
             }
         });
+    });
 
-    
+
     if (!panelElement) return;
 
     const userEmailSpan = panelElement.querySelector("#user-email");
@@ -298,43 +402,43 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
     };
 
     // Inicializa el dashboard y escucha puntajes
-   const initializeDashboardUI = (userId) => {
-    unitList.innerHTML = '';
-    units.forEach(unit => {
-        const li = document.createElement('li');
-        li.innerHTML = `<a href="#" data-unit-id="${unit.id}" class="unidad-link">
+    const initializeDashboardUI = (userId) => {
+        unitList.innerHTML = '';
+        units.forEach(unit => {
+            const li = document.createElement('li');
+            li.innerHTML = `<a href="#" data-unit-id="${unit.id}" class="unidad-link">
                             <span class="unidad-link__id">${unit.id}:</span> ${unit.title}
                         </a>`;
-        unitList.appendChild(li);
-        li.querySelector('a').addEventListener('click', (e) => {
-            e.preventDefault();
-            renderUnitContent(unit.id);
+            unitList.appendChild(li);
+            li.querySelector('a').addEventListener('click', (e) => {
+                e.preventDefault();
+                renderUnitContent(unit.id);
+            });
         });
-    });
 
 
 
-       // Agrega opción de calificaciones al final del menú
-    const gradesLi = document.createElement('li');
-    gradesLi.innerHTML = `<a href="#" id="grades-tab" class="unidad-link unidad-link--calificaciones">
+        // Agrega opción de calificaciones al final del menú
+        const gradesLi = document.createElement('li');
+        gradesLi.innerHTML = `<a href="#" id="grades-tab" class="unidad-link unidad-link--calificaciones">
         <span class="unidad-link__id">Calificaciones</span>
     </a>`;
-    unitList.appendChild(gradesLi);
+        unitList.appendChild(gradesLi);
 
-    const gradesTab = document.getElementById('grades-tab');
-    if (gradesTab) {
-        gradesTab.addEventListener('click', (e) => {
-            e.preventDefault();
-            renderGradesSection();
+        const gradesTab = document.getElementById('grades-tab');
+        if (gradesTab) {
+            gradesTab.addEventListener('click', (e) => {
+                e.preventDefault();
+                renderGradesSection();
+            });
+        }
+
+        const userRef = doc(db, `usuarios/${userId}`);
+        onSnapshot(userRef, (docSnap) => {
+            userScores = docSnap.exists() && docSnap.data().scores ? docSnap.data().scores : {};
+            updateUnitCompletionStatus();
         });
-    }
-
-    const userRef = doc(db, `usuarios/${userId}`);
-    onSnapshot(userRef, (docSnap) => {
-        userScores = docSnap.exists() && docSnap.data().scores ? docSnap.data().scores : {};
-        updateUnitCompletionStatus();
-    });
-};
+    };
 
     // Guarda solo la nota más alta en Firestore
     const saveTestScore = async (userId, unitId, score) => {
@@ -377,44 +481,80 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
 
     // Renderiza contenido de unidad y test
 
-const renderUnitContent = (unitId) => {
-  
-    // Oculta el panel de bienvenida
-    const userPanel = document.getElementById('user-panel');
-    if (userPanel) userPanel.style.display = 'none';
+    const renderUnitContent = async (unitId) => {
 
-    // Oculta calificaciones y todas las unidades
-    if (gradesSection) gradesSection.classList.add('seccion-unidad--oculta');
-    unitSections.forEach(section => section.classList.add('seccion-unidad--oculta'));
+        // Oculta el panel de bienvenida
+        const userPanel = document.getElementById('user-panel');
+        if (userPanel) userPanel.style.display = 'none';
 
-    // Activa el link seleccionado
-    document.querySelectorAll('.unidad-link').forEach(link => link.classList.remove('unidad-link--activo'));
-    const activeLink = document.querySelector(`[data-unit-id="${unitId}"]`);
-    if (activeLink) activeLink.classList.add('unidad-link--activo');
+        // Oculta calificaciones y todas las unidades
+        if (gradesSection) gradesSection.classList.add('seccion-unidad--oculta');
+        unitSections.forEach(section => section.classList.add('seccion-unidad--oculta'));
 
-    // Muestra la unidad seleccionada
-    const unitSection = document.getElementById(`unit-${unitId}`);
-    if (unitSection) {
-        unitSection.classList.remove('seccion-unidad--oculta');
-        // Elimina quiz anterior si existe
-        const oldQuiz = unitSection.querySelector('.tarjeta-actividad');
-        if (oldQuiz) oldQuiz.remove();
-        // Solo inserta el quiz si no es la unidad WRITING
-       
-    
-       
-        if (unitId !== 'WRITING') {
-            const quizDiv = document.createElement('div');
-            quizDiv.className = 'tarjeta-actividad';
-        
-    
-            // Different text for exams vs regular units
-            const isExam = unitId === 'EXAM1' || unitId === 'EXAM2';
-            const infoText = isExam ? 
-                'El examen solo se podrá dar una vez.‼️‼️' : 
-                'Solo se guardará tu nota más alta en este test.';
-            
-            quizDiv.innerHTML = `
+        // Activa el link seleccionado
+        document.querySelectorAll('.unidad-link').forEach(link => link.classList.remove('unidad-link--activo'));
+        const activeLink = document.querySelector(`[data-unit-id="${unitId}"]`);
+        if (activeLink) activeLink.classList.add('unidad-link--activo');
+
+        // Muestra la unidad seleccionada
+        const unitSection = document.getElementById(`unit-${unitId}`);
+        if (unitSection) {
+            unitSection.classList.remove('seccion-unidad--oculta');
+            // Elimina quiz anterior si existe
+
+
+
+            if (unitId === 'WRITING') {
+                // Busca el contenedor de feedback
+                const feedbackContainer = document.getElementById('feedbackContainer');
+                // Busca o crea el div de progreso
+                let writingProgressDiv = document.getElementById('writingProgressDiv');
+                if (!writingProgressDiv) {
+                    writingProgressDiv = document.createElement('div');
+                    writingProgressDiv.id = 'writingProgressDiv';
+                    writingProgressDiv.style.margin = "1.2rem 0";
+                    /*                 writingProgressDiv.style.fontSize = "1.2rem";  */
+                    // Lo insertas antes del feedbackContainer
+                    feedbackContainer.parentNode.insertBefore(writingProgressDiv, feedbackContainer);
+                }
+                // Obtén el progreso del usuario actual desde Firestore
+                let correctCount = 0;
+                let score = 0;
+                const user = auth.currentUser;
+                if (user) {
+                    const docRef = doc(db, `usuarios/${user.uid}`);
+                    const docSnap = await getDoc(docRef);
+                    const scores = docSnap.exists() && docSnap.data().scores ? docSnap.data().scores : {};
+                    const writingScore = scores['WRITING'] ? scores['WRITING'].score : 0;
+                    correctCount = Math.floor(writingScore / 2);
+                    score = writingScore;
+                }
+                // SIEMPRE muestra el progreso, aunque sea 0
+                writingProgressDiv.innerHTML = `
+                <b style="color:#2563eb;">Oraciones correctas:</b> ${correctCount}/5<br>
+                <b style="color:#2563eb;">Puntaje:</b> ${score}/10
+                ${correctCount >= 5 ? '<br><span style="color:green;font-weight:bold;">¡Completaste la sección de escritura!</span>' : ''}
+            `;
+            }
+
+            const oldQuiz = unitSection.querySelector('.tarjeta-actividad');
+            if (oldQuiz) oldQuiz.remove();
+            // Solo inserta el quiz si no es la unidad WRITING
+
+
+
+            if (unitId !== 'WRITING') {
+                const quizDiv = document.createElement('div');
+                quizDiv.className = 'tarjeta-actividad';
+
+
+                // Different text for exams vs regular units
+                const isExam = unitId === 'EXAM1' || unitId === 'EXAM2';
+                const infoText = isExam ?
+                    'El examen solo se podrá dar una vez.‼️‼️' :
+                    'Solo se guardará tu nota más alta en este test.';
+
+                quizDiv.innerHTML = `
                 <h3 class="tarjeta-actividad__subtitulo">Test Interactivo</h3>
                 <div class="quiz-progress-bar"><div id="quiz-progress-${unitId}" class="quiz-progress-bar-fill"></div></div>
                 <div id="quiz-container-${unitId}" class="contenedor-quiz">
@@ -428,139 +568,139 @@ const renderUnitContent = (unitId) => {
                     <p style="margin-top:1rem;font-weight:bold;"><b>${infoText}</b></p>
                 </div>
             `;
-            unitSection.appendChild(quizDiv);
-            setupTrueFalseQuiz(unitId);
-        } 
-        
-        
-        
-        // Audio dinámico para todas las unidades
-setTimeout(() => {
-    const playBtn = document.getElementById(`audio-play-${unitId.toLowerCase()}`);
-    const pauseBtn = document.getElementById(`audio-pause-${unitId.toLowerCase()}`);
-    const stopBtn = document.getElementById(`audio-stop-${unitId.toLowerCase()}`);
-    let utterance;
-    let isPaused = false;
-    let isSpeaking = false;
+                unitSection.appendChild(quizDiv);
+                setupTrueFalseQuiz(unitId);
+            }
 
-    if (playBtn) {
-        playBtn.onclick = () => {
-            window.speechSynthesis.cancel();
-            isPaused = false;
-            isSpeaking = true;
 
-            playBtn.classList.add('boton-audio--playing');
-            playBtn.innerHTML = '🔊 Reproduciendo...';
-            pauseBtn.classList.add('boton-audio--pause');
-            pauseBtn.classList.remove('boton-audio--resume');
-            pauseBtn.innerHTML = '⏸️ Pausar';
-            stopBtn.classList.add('boton-audio--stop');
 
-            // Solo lee el texto en inglés, ignorando lo que está dentro de <span>
-            const leccionUl = unitSection.querySelector('.tarjeta-leccion ul');
-            const vocabularioUl = unitSection.querySelector('.tarjeta-vocabulario ul');
-            let texto = '';
+            // Audio dinámico para todas las unidades
+            setTimeout(() => {
+                const playBtn = document.getElementById(`audio-play-${unitId.toLowerCase()}`);
+                const pauseBtn = document.getElementById(`audio-pause-${unitId.toLowerCase()}`);
+                const stopBtn = document.getElementById(`audio-stop-${unitId.toLowerCase()}`);
+                let utterance;
+                let isPaused = false;
+                let isSpeaking = false;
 
-            function getEnglishFromList(ul) {
-                if (!ul) return '';
-                return Array.from(ul.querySelectorAll('li'))
-                    .map(li => {
-                        const span = li.querySelector('span');
-                        if (span) {
-                            return li.innerText.replace(span.innerText, '').trim();
+                if (playBtn) {
+                    playBtn.onclick = () => {
+                        window.speechSynthesis.cancel();
+                        isPaused = false;
+                        isSpeaking = true;
+
+                        playBtn.classList.add('boton-audio--playing');
+                        playBtn.innerHTML = '🔊 Reproduciendo...';
+                        pauseBtn.classList.add('boton-audio--pause');
+                        pauseBtn.classList.remove('boton-audio--resume');
+                        pauseBtn.innerHTML = '⏸️ Pausar';
+                        stopBtn.classList.add('boton-audio--stop');
+
+                        // Solo lee el texto en inglés, ignorando lo que está dentro de <span>
+                        const leccionUl = unitSection.querySelector('.tarjeta-leccion ul');
+                        const vocabularioUl = unitSection.querySelector('.tarjeta-vocabulario ul');
+                        let texto = '';
+
+                        function getEnglishFromList(ul) {
+                            if (!ul) return '';
+                            return Array.from(ul.querySelectorAll('li'))
+                                .map(li => {
+                                    const span = li.querySelector('span');
+                                    if (span) {
+                                        return li.innerText.replace(span.innerText, '').trim();
+                                    }
+                                    if (li.innerText.includes(':')) {
+                                        return li.innerText.split(':')[0].trim();
+                                    }
+                                    return li.innerText.trim();
+                                })
+                                .filter(txt => txt.length > 0)
+                                .join('. ') + '. ';
                         }
-                        if (li.innerText.includes(':')) {
-                            return li.innerText.split(':')[0].trim();
+
+                        texto += getEnglishFromList(leccionUl);
+                        texto += getEnglishFromList(vocabularioUl);
+
+                        utterance = new SpeechSynthesisUtterance(texto);
+                        utterance.lang = 'en-US';
+
+                        utterance.onend = () => {
+                            isSpeaking = false;
+                            playBtn.classList.remove('boton-audio--playing');
+                            playBtn.innerHTML = '▶️ Reproducir';
+                            pauseBtn.classList.add('boton-audio--pause');
+                            pauseBtn.classList.remove('boton-audio--resume');
+                            pauseBtn.innerHTML = '⏸️ Pausar';
+                        };
+                        utterance.onpause = () => {
+                            isPaused = true;
+                            pauseBtn.classList.remove('boton-audio--pause');
+                            pauseBtn.classList.add('boton-audio--resume');
+                            pauseBtn.innerHTML = '▶️ Reanudar';
+                        };
+                        utterance.onresume = () => {
+                            isPaused = false;
+                            pauseBtn.classList.add('boton-audio--pause');
+                            pauseBtn.classList.remove('boton-audio--resume');
+                            pauseBtn.innerHTML = '⏸️ Pausar';
+                        };
+
+                        window.speechSynthesis.speak(utterance);
+                    };
+                }
+                if (pauseBtn) {
+                    pauseBtn.onclick = () => {
+                        if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+                            window.speechSynthesis.pause();
+                        } else if (window.speechSynthesis.paused && isPaused) {
+                            window.speechSynthesis.resume();
                         }
-                        return li.innerText.trim();
-                    })
-                    .filter(txt => txt.length > 0)
-                    .join('. ') + '. ';
-            }
-
-            texto += getEnglishFromList(leccionUl);
-            texto += getEnglishFromList(vocabularioUl);
-
-            utterance = new SpeechSynthesisUtterance(texto);
-            utterance.lang = 'en-US';
-
-            utterance.onend = () => {
-                isSpeaking = false;
-                playBtn.classList.remove('boton-audio--playing');
-                playBtn.innerHTML = '▶️ Reproducir';
-                pauseBtn.classList.add('boton-audio--pause');
-                pauseBtn.classList.remove('boton-audio--resume');
-                pauseBtn.innerHTML = '⏸️ Pausar';
-            };
-            utterance.onpause = () => {
-                isPaused = true;
-                pauseBtn.classList.remove('boton-audio--pause');
-                pauseBtn.classList.add('boton-audio--resume');
-                pauseBtn.innerHTML = '▶️ Reanudar';
-            };
-            utterance.onresume = () => {
-                isPaused = false;
-                pauseBtn.classList.add('boton-audio--pause');
-                pauseBtn.classList.remove('boton-audio--resume');
-                pauseBtn.innerHTML = '⏸️ Pausar';
-            };
-
-            window.speechSynthesis.speak(utterance);
-        };
-    }
-    if (pauseBtn) {
-        pauseBtn.onclick = () => {
-            if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
-                window.speechSynthesis.pause();
-            } else if (window.speechSynthesis.paused && isPaused) {
-                window.speechSynthesis.resume();
-            }
-        };
-        pauseBtn.classList.add('boton-audio--pause');
-        pauseBtn.classList.remove('boton-audio--resume');
-        pauseBtn.innerHTML = '⏸️ Pausar';
-    }
-    if (stopBtn) {
-        stopBtn.onclick = () => {
-            window.speechSynthesis.cancel();
-            if (playBtn) {
-                playBtn.classList.remove('boton-audio--playing');
-                playBtn.innerHTML = '▶️ Reproducir';
-            }
-            if (pauseBtn) {
-                pauseBtn.classList.add('boton-audio--pause');
-                pauseBtn.classList.remove('boton-audio--resume');
-                pauseBtn.innerHTML = '⏸️ Pausar';
-            }
-        };
-        stopBtn.classList.add('boton-audio--stop');
-        stopBtn.innerHTML = '⏹️ Parar';
-    }
-}, 0);
-    } else {
-        mainContent.classList.remove('seccion-contenido--oculta');
-        mainContent.innerHTML = `
+                    };
+                    pauseBtn.classList.add('boton-audio--pause');
+                    pauseBtn.classList.remove('boton-audio--resume');
+                    pauseBtn.innerHTML = '⏸️ Pausar';
+                }
+                if (stopBtn) {
+                    stopBtn.onclick = () => {
+                        window.speechSynthesis.cancel();
+                        if (playBtn) {
+                            playBtn.classList.remove('boton-audio--playing');
+                            playBtn.innerHTML = '▶️ Reproducir';
+                        }
+                        if (pauseBtn) {
+                            pauseBtn.classList.add('boton-audio--pause');
+                            pauseBtn.classList.remove('boton-audio--resume');
+                            pauseBtn.innerHTML = '⏸️ Pausar';
+                        }
+                    };
+                    stopBtn.classList.add('boton-audio--stop');
+                    stopBtn.innerHTML = '⏹️ Parar';
+                }
+            }, 0);
+        } else {
+            mainContent.classList.remove('seccion-contenido--oculta');
+            mainContent.innerHTML = `
             <h1 class="seccion-contenido__titulo">Unidad no encontrada.</h1>
             <p class="seccion-contenido__subtitulo">Por favor, selecciona otra unidad.</p>
         `;
-    }
-};
+        }
+    };
 
     // Renderiza la pestaña de calificaciones
-   
-const renderGradesSection = () => {
-    // Oculta el panel de bienvenida igual que al seleccionar una unidad
-    const userPanel = document.getElementById('user-panel');
-    if (userPanel) userPanel.style.display = 'none';
 
-    mainContent.classList.add('seccion-contenido--oculta');
-    unitSections.forEach(section => section.classList.add('seccion-unidad--oculta'));
-    let gradesSection = document.getElementById('grades-section');
-    if (!gradesSection) {
-        gradesSection = document.createElement('section');
-        gradesSection.id = 'grades-section';
-        gradesSection.className = 'seccion-unidad';
-        gradesSection.innerHTML = `
+    const renderGradesSection = () => {
+        // Oculta el panel de bienvenida igual que al seleccionar una unidad
+        const userPanel = document.getElementById('user-panel');
+        if (userPanel) userPanel.style.display = 'none';
+
+        mainContent.classList.add('seccion-contenido--oculta');
+        unitSections.forEach(section => section.classList.add('seccion-unidad--oculta'));
+        let gradesSection = document.getElementById('grades-section');
+        if (!gradesSection) {
+            gradesSection = document.createElement('section');
+            gradesSection.id = 'grades-section';
+            gradesSection.className = 'seccion-unidad';
+            gradesSection.innerHTML = `
             <div class="tarjeta-leccion">
                 <h2 class="tarjeta-leccion__titulo">Calificaciones por Unidad</h2>
                 <table class="tabla-calificaciones">
@@ -575,186 +715,186 @@ const renderGradesSection = () => {
                 </table>
             </div>
         `;
-        mainContent.parentNode.appendChild(gradesSection);
-    }
-    gradesSection.classList.remove('seccion-unidad--oculta');
-    const tbody = document.getElementById("grades-table-body");
-    if (tbody) {
-        tbody.innerHTML = "";
-        units.forEach(unit => {
-            const scoreData = userScores[unit.id];
-            const score = scoreData ? scoreData.score : "-";
-            const estado = scoreData && scoreData.completada ? "Completada" : "Pendiente";
-            const estadoClass = scoreData && scoreData.completada ? "estado-aprobado" : "estado-reprobado";
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
+            mainContent.parentNode.appendChild(gradesSection);
+        }
+        gradesSection.classList.remove('seccion-unidad--oculta');
+        const tbody = document.getElementById("grades-table-body");
+        if (tbody) {
+            tbody.innerHTML = "";
+            units.forEach(unit => {
+                const scoreData = userScores[unit.id];
+                const score = scoreData ? scoreData.score : "-";
+                const estado = scoreData && scoreData.completada ? "Completada" : "Pendiente";
+                const estadoClass = scoreData && scoreData.completada ? "estado-aprobado" : "estado-reprobado";
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
                 <td>${unit.title}</td>
                 <td><b>${score !== "-" ? score.toFixed(1) : "-"}</b></td>
                 <td class="${estadoClass}">${score !== "-" ? estado : "-"}</td>
             `;
-            tbody.appendChild(tr);
-        });
-    }
-    document.querySelectorAll('.unidad-link').forEach(link => link.classList.remove('unidad-link--activo'));
-    const gradesTab = document.getElementById('grades-tab');
-    if (gradesTab) gradesTab.classList.add('unidad-link--activo');
-};
+                tbody.appendChild(tr);
+            });
+        }
+        document.querySelectorAll('.unidad-link').forEach(link => link.classList.remove('unidad-link--activo'));
+        const gradesTab = document.getElementById('grades-tab');
+        if (gradesTab) gradesTab.classList.add('unidad-link--activo');
+    };
 
     // Quiz interactivo con barra de progreso - Exámenes solo permiten un intento
-const setupTrueFalseQuiz = (unitId) => {
-    let currentQuestionIndex = 0;
-    let correctAnswers = 0;
-    const questions = quizData[unitId];
-    const totalQuestions = questions.length;
-    const questionEl = document.getElementById(`question-${unitId}`);
-    const feedbackEl = document.getElementById(`feedback-${unitId}`);
-    const quizBtns = document.querySelectorAll(`#quiz-container-${unitId} .boton-quiz`);
-    const progressBar = document.getElementById(`quiz-progress-${unitId}`);
-    const repeatBtn = document.getElementById(`repeat-quiz-${unitId}`);
+    const setupTrueFalseQuiz = (unitId) => {
+        let currentQuestionIndex = 0;
+        let correctAnswers = 0;
+        const questions = quizData[unitId];
+        const totalQuestions = questions.length;
+        const questionEl = document.getElementById(`question-${unitId}`);
+        const feedbackEl = document.getElementById(`feedback-${unitId}`);
+        const quizBtns = document.querySelectorAll(`#quiz-container-${unitId} .boton-quiz`);
+        const progressBar = document.getElementById(`quiz-progress-${unitId}`);
+        const repeatBtn = document.getElementById(`repeat-quiz-${unitId}`);
 
-    // Sonidos
-    const playSound = (type) => {
-        let audio;
-        if (type === "correct") {
-            audio = new Audio("assets/correct-ding.mp3");
-        } else if (type === "wrong") {
-            audio = new Audio("assets/chicharra-error-incorrecto-.mp3");
-        } else if (type === "win") {
-            audio = new Audio("assets/bites-ta-da-winner.mp3");
-        } else if (type === "fail") {
-            audio = new Audio("assets/computers-critical-error-windows.mp3");
-        }
-        if (audio) audio.play();
-    };
-
-    // Notificación animada
-    const showAnimatedNotification = (message, success = true) => {
-        let notif = document.getElementById('quiz-notification');
-        if (!notif) {
-            notif = document.createElement('div');
-            notif.id = 'quiz-notification';
-            notif.className = 'quiz-notification';
-            document.body.appendChild(notif);
-        }
-        notif.innerHTML = message;
-        notif.classList.remove('quiz-notification--hide');
-        notif.classList.toggle('quiz-notification--success', success);
-        notif.classList.toggle('quiz-notification--fail', !success);
-        setTimeout(() => {
-            notif.classList.add('quiz-notification--hide');
-        }, 3500);
-    };
-
-    function showQuestion() {
-        if (progressBar) progressBar.style.width = `${(currentQuestionIndex / totalQuestions) * 100}%`;
-        if (currentQuestionIndex < totalQuestions) {
-            questionEl.textContent = questions[currentQuestionIndex].question;
-            feedbackEl.textContent = '';
-            feedbackEl.classList.remove('contenedor-quiz__retroalimentacion--sucesso', 'contenedor-quiz__retroalimentacion--error');
-            quizBtns.forEach(btn => btn.disabled = false);
-        } else {
-            const score = (correctAnswers / totalQuestions) * 10;
-            questionEl.textContent = `Examen completado. Tu puntaje es: ${score.toFixed(1)}/10`;
-            
-            // Para exámenes (EXAM1 y EXAM2), mostrar mensaje de un solo intento
-            if (unitId === 'EXAM1' || unitId === 'EXAM2') {
-                feedbackEl.textContent = 'danilo miranda xd';
-            } else {
-                feedbackEl.textContent = score >= 7 ? '¡Felicidades!' : 'Puedes mejorar tu puntaje.';
+        /* // Sonidos
+        const playSound = (type) => {
+            let audio;
+            if (type === "correct") {
+                audio = new Audio("assets/correct-ding.mp3");
+            } else if (type === "wrong") {
+                audio = new Audio("assets/chicharra-error-incorrecto-.mp3");
+            } else if (type === "win") {
+                audio = new Audio("assets/bites-ta-da-winner.mp3");
+            } else if (type === "fail") {
+                audio = new Audio("assets/computers-critical-error-windows.mp3");
             }
-            
-            feedbackEl.classList.toggle('contenedor-quiz__retroalimentacion--sucesso', score >= 7);
-            feedbackEl.classList.toggle('contenedor-quiz__retroalimentacion--error', score < 7);
+            if (audio) audio.play();
+        }; */
+
+        // Notificación animada
+        const showAnimatedNotification = (message, success = true) => {
+            let notif = document.getElementById('quiz-notification');
+            if (!notif) {
+                notif = document.createElement('div');
+                notif.id = 'quiz-notification';
+                notif.className = 'quiz-notification';
+                document.body.appendChild(notif);
+            }
+            notif.innerHTML = message;
+            notif.classList.remove('quiz-notification--hide');
+            notif.classList.toggle('quiz-notification--success', success);
+            notif.classList.toggle('quiz-notification--fail', !success);
+            setTimeout(() => {
+                notif.classList.add('quiz-notification--hide');
+            }, 3500);
+        };
+
+        function showQuestion() {
+            if (progressBar) progressBar.style.width = `${(currentQuestionIndex / totalQuestions) * 100}%`;
+            if (currentQuestionIndex < totalQuestions) {
+                questionEl.textContent = questions[currentQuestionIndex].question;
+                feedbackEl.textContent = '';
+                feedbackEl.classList.remove('contenedor-quiz__retroalimentacion--sucesso', 'contenedor-quiz__retroalimentacion--error');
+                quizBtns.forEach(btn => btn.disabled = false);
+            } else {
+                const score = (correctAnswers / totalQuestions) * 10;
+                questionEl.textContent = `Examen completado. Tu puntaje es: ${score.toFixed(1)}/10`;
+
+                // Para exámenes (EXAM1 y EXAM2), mostrar mensaje de un solo intento
+                if (unitId === 'EXAM1' || unitId === 'EXAM2') {
+                    feedbackEl.textContent = 'danilo miranda xd';
+                } else {
+                    feedbackEl.textContent = score >= 7 ? '¡Felicidades!' : 'Puedes mejorar tu puntaje.';
+                }
+
+                feedbackEl.classList.toggle('contenedor-quiz__retroalimentacion--sucesso', score >= 7);
+                feedbackEl.classList.toggle('contenedor-quiz__retroalimentacion--error', score < 7);
+                quizBtns.forEach(btn => btn.disabled = true);
+
+                // Ocultar botón de repetir para exámenes
+                if (unitId === 'EXAM1' || unitId === 'EXAM2') {
+                    repeatBtn.style.display = "none";
+                } else {
+                    repeatBtn.style.display = "inline-block";
+                }
+
+                // Sonido y notificación final
+                if (score >= 7) {
+                    playSound("win");
+                    showAnimatedNotification('¡Lo lograste! 🎉🥳<br><span style="font-size:2rem;">✅</span>', true);
+                } else {
+                    playSound("fail");
+                    showAnimatedNotification('¡Sigue intentando! 😢<br><span style="font-size:2rem;">🚫</span>', false);
+                }
+            }
+        }
+
+        quizBtns.forEach(btn => {
+            btn.onclick = () => {
+                if (btn.disabled) return;
+                const userAnswer = btn.dataset.answer;
+                const correctAnswer = questions[currentQuestionIndex].answer;
+                if (userAnswer === correctAnswer) {
+                    correctAnswers++;
+                    feedbackEl.textContent = "¡Correcto!";
+                    feedbackEl.classList.add('contenedor-quiz__retroalimentacion--sucesso');
+                    feedbackEl.classList.remove('contenedor-quiz__retroalimentacion--error');
+                    playSound("correct");
+                } else {
+                    feedbackEl.textContent = `Incorrecto. La respuesta correcta era: ${correctAnswer === "true" ? "Verdadero" : "Falso"}`;
+                    feedbackEl.classList.add('contenedor-quiz__retroalimentacion--error');
+                    feedbackEl.classList.remove('contenedor-quiz__retroalimentacion--sucesso');
+                    playSound("wrong");
+                }
+                quizBtns.forEach(b => b.disabled = true);
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    showQuestion();
+                    if (currentQuestionIndex > totalQuestions - 1) {
+                        const score = (correctAnswers / totalQuestions) * 10;
+                        const user = auth.currentUser;
+                        if (user) saveTestScore(user.uid, unitId, score);
+                    }
+                }, 900);
+            };
+        });
+
+        // Solo mostrar botón de repetir para unidades normales, no para exámenes
+        if (repeatBtn) {
+            if (unitId === 'EXAM1' || unitId === 'EXAM2') {
+                repeatBtn.style.display = "none";
+            } else {
+                repeatBtn.onclick = () => {
+                    currentQuestionIndex = 0;
+                    correctAnswers = 0;
+                    quizBtns.forEach(btn => btn.disabled = false);
+                    repeatBtn.style.display = "none";
+                    showQuestion();
+                };
+            }
+        }
+
+        const scoreData = userScores[unitId];
+        if (scoreData) {
+            questionEl.textContent = `Examen completado. Tu puntaje es: ${scoreData.score.toFixed(1)}/10`;
+
+            // Para exámenes, mostrar mensaje de un solo intento
+            if (unitId === 'EXAM1' || unitId === 'EXAM2') {
+                feedbackEl.textContent = 'EXAMEN REALIZADO.';
+            } else {
+                feedbackEl.textContent = scoreData.completada ? '¡Felicidades!' : 'Puedes mejorar tu puntaje.';
+            }
+
+            feedbackEl.classList.toggle('contenedor-quiz__retroalimentacion--sucesso', scoreData.completada);
+            feedbackEl.classList.toggle('contenedor-quiz__retroalimentacion--error', !scoreData.completada);
             quizBtns.forEach(btn => btn.disabled = true);
-            
+
             // Ocultar botón de repetir para exámenes
             if (unitId === 'EXAM1' || unitId === 'EXAM2') {
-                repeatBtn.style.display = "none";
+                if (repeatBtn) repeatBtn.style.display = "none";
             } else {
-                repeatBtn.style.display = "inline-block";
+                if (repeatBtn) repeatBtn.style.display = "inline-block";
             }
-            
-            // Sonido y notificación final
-            if (score >= 7) {
-                playSound("win");
-                showAnimatedNotification('¡Lo lograste! 🎉🥳<br><span style="font-size:2rem;">✅</span>', true);
-            } else {
-                playSound("fail");
-                showAnimatedNotification('¡Sigue intentando! 😢<br><span style="font-size:2rem;">🚫</span>', false);
-            }
-        }
-    }
-
-    quizBtns.forEach(btn => {
-        btn.onclick = () => {
-            if (btn.disabled) return;
-            const userAnswer = btn.dataset.answer;
-            const correctAnswer = questions[currentQuestionIndex].answer;
-            if (userAnswer === correctAnswer) {
-                correctAnswers++;
-                feedbackEl.textContent = "¡Correcto!";
-                feedbackEl.classList.add('contenedor-quiz__retroalimentacion--sucesso');
-                feedbackEl.classList.remove('contenedor-quiz__retroalimentacion--error');
-                playSound("correct");
-            } else {
-                feedbackEl.textContent = `Incorrecto. La respuesta correcta era: ${correctAnswer === "true" ? "Verdadero" : "Falso"}`;
-                feedbackEl.classList.add('contenedor-quiz__retroalimentacion--error');
-                feedbackEl.classList.remove('contenedor-quiz__retroalimentacion--sucesso');
-                playSound("wrong");
-            }
-            quizBtns.forEach(b => b.disabled = true);
-            setTimeout(() => {
-                currentQuestionIndex++;
-                showQuestion();
-                if (currentQuestionIndex > totalQuestions - 1) {
-                    const score = (correctAnswers / totalQuestions) * 10;
-                    const user = auth.currentUser;
-                    if (user) saveTestScore(user.uid, unitId, score);
-                }
-            }, 900);
-        };
-    });
-
-    // Solo mostrar botón de repetir para unidades normales, no para exámenes
-    if (repeatBtn) {
-        if (unitId === 'EXAM1' || unitId === 'EXAM2') {
-            repeatBtn.style.display = "none";
         } else {
-            repeatBtn.onclick = () => {
-                currentQuestionIndex = 0;
-                correctAnswers = 0;
-                quizBtns.forEach(btn => btn.disabled = false);
-                repeatBtn.style.display = "none";
-                showQuestion();
-            };
+            showQuestion();
         }
-    }
-
-    const scoreData = userScores[unitId];
-    if (scoreData) {
-        questionEl.textContent = `Examen completado. Tu puntaje es: ${scoreData.score.toFixed(1)}/10`;
-        
-        // Para exámenes, mostrar mensaje de un solo intento
-        if (unitId === 'EXAM1' || unitId === 'EXAM2') {
-            feedbackEl.textContent = 'EXAMEN REALIZADO.';
-        } else {
-            feedbackEl.textContent = scoreData.completada ? '¡Felicidades!' : 'Puedes mejorar tu puntaje.';
-        }
-        
-        feedbackEl.classList.toggle('contenedor-quiz__retroalimentacion--sucesso', scoreData.completada);
-        feedbackEl.classList.toggle('contenedor-quiz__retroalimentacion--error', !scoreData.completada);
-        quizBtns.forEach(btn => btn.disabled = true);
-        
-        // Ocultar botón de repetir para exámenes
-        if (unitId === 'EXAM1' || unitId === 'EXAM2') {
-            if (repeatBtn) repeatBtn.style.display = "none";
-        } else {
-            if (repeatBtn) repeatBtn.style.display = "inline-block";
-        }
-    } else {
-        showQuestion();
-    }
-};
+    };
 
 
     // Autenticación y eventos
@@ -789,8 +929,8 @@ const setupTrueFalseQuiz = (unitId) => {
         });
     }
 
-  
-const audioBtnUT1 = document.getElementById('audio-ut1');
+
+    const audioBtnUT1 = document.getElementById('audio-ut1');
     if (audioBtnUT1) {
         audioBtnUT1.addEventListener('click', () => {
             const texto = `

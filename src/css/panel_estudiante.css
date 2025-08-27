@@ -900,4 +900,24 @@ overflow: hidden;
             font-weight: 500;
         }
 
-        
+        /* Progreso WRITING */
+#feedbackContainer b {
+    color: #2563eb;
+    font-size: 1.1rem;
+}
+
+#feedbackContainer span {
+    font-size: 1.2rem;
+}
+
+#feedbackContainer {
+    margin-top: 1rem;
+}
+
+#feedbackContainer .feedback-message--correct {
+    color: #22C55E;
+}
+
+#feedbackContainer .feedback-message--incorrect {
+    color: #EF4444;
+}
