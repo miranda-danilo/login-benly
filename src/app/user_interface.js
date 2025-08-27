@@ -17,7 +17,6 @@ const units = [
     { id: 'WRITING', title: 'Práctica de Escritura', quiz: 'none' }, // Removed interactive test
     { id: 'EXAM1', title: 'FIRST TERM EXAMEN', quiz: 'true_false' },
     { id: 'EXAM2', title: 'SECOND TERM EXAMEN', quiz: 'true_false' },
-    /* { id: 'UT7', title: 'Around Town - Free Time', quiz: 'true_false' }, */
 ];
 
 const quizData = {
