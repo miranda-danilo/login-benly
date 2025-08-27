@@ -14,7 +14,6 @@ const units = [
     { id: 'UT4', title: 'Foods and Drinks', quiz: 'true_false' },
     { id: 'UT5', title: 'Things I Have', quiz: 'true_false' },
     { id: 'UT6', title: 'Around Town - Free Time', quiz: 'true_false' },
-    { id: 'JUEGOS', title: 'Juegos - Ahorcado', quiz: 'none' },
     { id: 'WRITING', title: 'Práctica de Escritura', quiz: 'none' }, // Removed interactive test
     { id: 'EXAM1', title: 'FIRST TERM EXAMEN', quiz: 'true_false' },
     { id: 'EXAM2', title: 'SECOND TERM EXAMEN', quiz: 'true_false' },
@@ -404,7 +403,7 @@ const renderUnitContent = (unitId) => {
        
     
        
-        if (unitId !== 'WRITING' && unitId !== 'JUEGOS') {
+        if (unitId !== 'WRITING') {
             const quizDiv = document.createElement('div');
             quizDiv.className = 'tarjeta-actividad';
         
@@ -432,10 +431,7 @@ const renderUnitContent = (unitId) => {
             unitSection.appendChild(quizDiv);
             setupTrueFalseQuiz(unitId);
         } 
-        else if (unitId === 'JUEGOS') {
-            
-            setupHangmanGame();
-        }
+        
         
         
         // Audio dinámico para todas las unidades
@@ -760,172 +756,7 @@ const setupTrueFalseQuiz = (unitId) => {
     }
 };
 
-// ==========================================================================
-// Lógica del Juego del Ahorcado
-// ==========================================================================
 
-function setupHangmanGame() {
-    const unitWords = {
-        UT1: ['hello', 'bye', 'morning', 'night', 'teacher', 'student'],
-        UT2: ['mother', 'father', 'sister', 'brother', 'family', 'home', 'city', 'town'],
-        UT3: ['always', 'never', 'sometimes', 'schedule', 'morning', 'evening'],
-        UT4: ['apple', 'banana', 'orange', 'grape', 'sandwich', 'water', 'juice', 'coffee'],
-        UT5: ['phone', 'laptop', 'bag', 'wallet', 'keys', 'notebook', 'shoe'],
-        UT6: ['town', 'bank', 'store', 'park', 'movies', 'sports', 'reading', 'cooking']
-    };
-
-    const wordDisplay = document.getElementById('hangman-word');
-    const messageDisplay = document.getElementById('hangman-message');
-    const lettersContainer = document.getElementById('hangman-letters');
-    const subtitulo = document.getElementById('subtitulo');
-    const restartButton = document.getElementById('hangman-restart-button');
-    const unitSelector = document.getElementById('unit-selector');
-    const hangmanParts = document.querySelectorAll('.parte-ahorcado');
-
-    let secretWord = '';
-    let guessedLetters = [];
-    let mistakesLeft = 6;
-    let currentScore = 0;
-
-    function updateWordDisplay() {
-        let display = '';
-        for (const letter of secretWord) {
-            if (guessedLetters.includes(letter)) {
-                display += letter + ' ';
-            } else {
-                display += '_ ';
-            }
-        }
-        wordDisplay.textContent = display.trim();
-        console.log('Palabra actualizada en pantalla:', wordDisplay.textContent);
-    }
-
-    function updateHangman() {
-        const partsToDisplay = 8 - mistakesLeft;
-        hangmanParts.forEach((part, index) => {
-            part.style.display = index < partsToDisplay ? 'block' : 'none';
-        });
-    }
-
-    function checkWin() {
-        if (!wordDisplay.textContent.includes('_')) {
-            currentScore = 10;
-            messageDisplay.textContent = `¡Ganaste! 🎉 Calificación: ${currentScore}`;
-            messageDisplay.className = 'juego-ahorcado__mensaje juego-ahorcado__mensaje--ganador';
-            disableLetters();
-            // Guarda la calificación en Firestore
-            const user = auth.currentUser;
-            if (user) {
-                saveTestScore(user.uid, 'JUEGOS', currentScore);
-            }
-        }
-    }
-
-    function checkLose() {
-        if (mistakesLeft <= 0) {
-            currentScore = 0;
-            messageDisplay.textContent = `¡Perdiste! 😭 La palabra era: ${secretWord}. Calificación: ${currentScore}`;
-            messageDisplay.className = 'juego-ahorcado__mensaje juego-ahorcado__mensaje--perdedor';
-            updateHangman();
-            disableLetters();
-            // Guarda la calificación en Firestore
-            const user = auth.currentUser;
-            if (user) {
-                saveTestScore(user.uid, 'JUEGOS', currentScore);
-            }
-        }
-    }
-
-    function disableLetter(letterButton, correct) {
-        letterButton.disabled = true;
-        letterButton.classList.add(correct ? 'juego-ahorcado__letra--correcta' : 'juego-ahorcado__letra--incorrecta');
-    }
-
-    function disableLetters() {
-        document.querySelectorAll('.juego-ahorcado__letras button').forEach(button => {
-            button.disabled = true;
-        });
-    }
-    
-    function enableLetters() {
-        document.querySelectorAll('.juego-ahorcado__letras button').forEach(button => {
-            button.disabled = false;
-            button.className = 'juego-ahorcado__letra';
-        });
-    }
-    
-    function generateLetters() {
-        lettersContainer.innerHTML = '';
-        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        for (const letter of alphabet) {
-            const button = document.createElement('button');
-            button.textContent = letter;
-            button.className = 'juego-ahorcado__letra';
-            button.addEventListener('click', handleGuess);
-            lettersContainer.appendChild(button);
-        }
-
-        console.log('Letras generadas para el juego del ahorcado.');
-    }
-
-    function handleGuess(event) {
-        if (unitSelector.value === 'none') return;
-        
-        const letter = event.target.textContent;
-        if (guessedLetters.includes(letter)) {
-            return;
-        }
-        guessedLetters.push(letter);
-        const correctGuess = secretWord.includes(letter);
-        disableLetter(event.target, correctGuess);
-
-        if (correctGuess) {
-            updateWordDisplay();
-            checkWin();
-        } else {
-            mistakesLeft--;
-            updateHangman();
-            checkLose();
-        }
-    }
-
-    function resetGame() {
-        const selectedUnit = unitSelector.value;
-        if (selectedUnit === 'none') {
-            subtitulo.textContent = 'Selecciona una opción para empezar.';
-            wordDisplay.textContent = '';
-            messageDisplay.textContent = '';
-            disableLetters();
-            hangmanParts.forEach(part => part.style.display = 'none');
-            return;
-        }
-        
-        enableLetters();
-        subtitulo.textContent = '¡Adivina la palabra!';
-        const wordsForUnit = unitWords[selectedUnit] || [];
-        secretWord = wordsForUnit[(Math.random() * wordsForUnit.length) | 0].toUpperCase();
-        guessedLetters = [];
-        mistakesLeft = 6;
-        currentScore = 0;
-        messageDisplay.textContent = '';
-        messageDisplay.className = 'juego-ahorcado__mensaje';
-        updateWordDisplay();
-        updateHangman();
-    }
-    
-    // Nueva lógica de inicialización. Primero genera las letras y luego
-    // espera a que el usuario seleccione una unidad.
-    generateLetters();
-    unitSelector.addEventListener('change', resetGame);
-    
-    if (restartButton) {
-        restartButton.addEventListener('click', () => {
-            unitSelector.value = 'none';
-            resetGame();
-        });
-    }
-
-}
     // Autenticación y eventos
     onAuthStateChanged(auth, (user) => {
         if (user) {
