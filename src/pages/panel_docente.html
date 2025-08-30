@@ -1,17 +1,43 @@
-<!-- Panel para administradores (Docentes) -->
-<section id="admin-panel">
-    <!-- Encabezado del perfil -->
-    <div class="flex items-center space-x-4 mb-8 p-4 bg-white rounded-lg shadow-md">
-        <img id="admin-photo" class="w-20 h-20 rounded-full object-cover border-4 border-purple-500" src="https://placehold.co/80x80/E2E8F0/A0AEC0?text=Docente" alt="Foto de perfil de admin">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-900">Panel del Docente</h1>
-            <p class="text-md text-gray-500">¡Hola, <span id="admin-name">Administrador</span>! Tienes acceso completo.</p>
-            <p class="text-sm text-gray-600">Tu rol es: <span id="admin-role" class="font-bold"></span></p>
-        </div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Docente - Benly</title>
+    <script type="module" src="../app/docente_interface.js"></script>
+      
+</head>
+<body class="cuerpo-admin">
+    <div class="contenedor-admin">
+        <aside class="barra-lateral-admin">
+            <div class="barra-lateral__encabezado-admin">
+                <img id="admin-photo" class="barra-lateral__foto-admin" alt="Foto de docente">
+                <h2 class="barra-lateral__titulo-admin">¡Hola, <span id="admin-name">Docente</span>!</h2>
+                <div id="admin-role"></div>
+            </div>
+            <nav>
+                <ul id="module-list-admin" class="lista-modulos-admin"></ul>
+            </nav>
+            <button id="logout-btn-admin" class="boton-logout-admin">Cerrar Sesión</button>
+        </aside>
+        <main class="contenido-principal-admin" id="admin-panel">
+            <section id="modulo-section-admin" class="seccion-admin">
+                <h1 class="titulo-admin">Panel de Módulos Interactivos</h1>
+                <div id="modulo-content-admin"></div>
+            </section>
+            <section id="estudiantes-section-admin" class="seccion-admin seccion-admin--hidden">
+                <h2 class="titulo-admin">Gestión de Estudiantes</h2>
+                <div id="estudiantes-content-admin"></div>
+            </section>
+            <section id="progreso-section-admin" class="seccion-admin seccion-admin--hidden">
+                <h2 class="titulo-admin">Monitoreo de Progreso</h2>
+                <div id="progreso-content-admin"></div>
+            </section>
+            <section id="kahoot-section-admin" class="seccion-admin seccion-admin--hidden">
+                <h2 class="titulo-admin">Quiz tipo Kahoot</h2>
+                <div id="kahoot-content-admin"></div>
+            </section>
+        </main>
     </div>
-
-    <!-- Contenido del panel de administrador... -->
-    <button id="logout-btn-admin" class="mt-6 w-full sm:w-auto bg-red-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 transition duration-300">
-        Cerrar Sesión
-    </button>
-</section>
+</body>
+</html>

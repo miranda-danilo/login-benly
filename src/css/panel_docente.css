@@ -1,0 +1,221 @@
+:root {
+    --primary-color: #58CC02;
+    --secondary-color: #2563eb;
+    --tertiary-color: #ffd600;
+    --admin-bg: #1F2937;
+    --admin-card: #fff;
+    --admin-text: #222;
+    --admin-accent: #7c3aed;
+    --admin-border: #e5e7eb;
+    --admin-success: #22C55E;
+    --admin-danger: #EF4444;
+}
+
+.cuerpo-admin {
+    background: var(--admin-bg);
+    min-height: 100vh;
+    color: var(--admin-text);
+}
+
+.contenedor-admin {
+    display: flex;
+    width: 100vw;
+    min-height: 100vh;
+}
+
+.barra-lateral-admin {
+    width: 17rem;
+    background: var(--secondary-color);
+    color: #fff;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.barra-lateral__foto-admin {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+    border: 3px solid var(--admin-accent);
+    object-fit: cover;
+}
+
+.barra-lateral__titulo-admin {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.lista-modulos-admin {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0;
+    width: 100%;
+}
+
+.lista-modulos-admin li {
+    margin-bottom: 0.5rem;
+}
+
+.modulo-link-admin {
+    display: block;
+    background: none;
+    color: #fff;
+    padding: 0.8rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.modulo-link-admin--activo,
+.modulo-link-admin:hover {
+    background: var(--admin-accent);
+    color: #fff;
+}
+
+.boton-logout-admin {
+    margin-top: auto;
+    padding: 0.7rem 1.3rem;
+    background: var(--admin-danger);
+    color: #fff;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.boton-logout-admin:hover {
+    background: #e53935;
+}
+
+.contenido-principal-admin {
+    flex: 1;
+    padding: 2.5rem;
+    background: var(--admin-card);
+    min-height: 100vh;
+}
+
+.titulo-admin {
+    font-size: 2rem;
+    color: var(--secondary-color);
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+}
+
+.seccion-admin {
+    margin-bottom: 2.5rem;
+    background: var(--admin-card);
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    padding: 2rem;
+}
+
+.seccion-admin--hidden {
+    display: none;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background: #fff;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 0.75rem;
+    text-align: center;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-table th {
+    background: var(--admin-bg);
+    color: #fff;
+    font-weight: 700;
+}
+
+.admin-table td {
+    font-size: 1rem;
+}
+
+.admin-table tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-table .estado-aprobado {
+    color: var(--admin-success);
+    font-weight: 700;
+}
+
+.admin-table .estado-reprobado {
+    color: var(--admin-danger);
+    font-weight: 700;
+}
+
+.kahoot-card {
+    padding: 1.5rem;
+    background: var(--admin-bg);
+    color: #fff;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 16px rgba(44, 165, 78, 0.12);
+}
+
+.kahoot-code {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--tertiary-color);
+    letter-spacing: 0.15em;
+    margin-bottom: 1rem;
+    background: #222;
+    border-radius: 0.5rem;
+    padding: 0.6rem 1.3rem;
+    display: inline-block;
+}
+
+.kahoot-join-list {
+    margin-top: 1.5rem;
+    background: #fff;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    color: var(--admin-text);
+}
+
+.kahoot-quiz-form {
+    margin-top: 2rem;
+}
+
+.kahoot-quiz-form input,
+.kahoot-quiz-form textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid var(--admin-border);
+    border-radius: 0.4rem;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+.kahoot-quiz-form button {
+    background: var(--admin-accent);
+    color: #fff;
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 0.4rem;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.kahoot-quiz-form button:hover {
+    background: var(--secondary-color);
+}
