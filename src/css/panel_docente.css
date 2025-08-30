@@ -1,31 +1,51 @@
 :root {
     --primary-color: #58CC02;
     --secondary-color: #2563eb;
-    --tertiary-color: #ffd600;
     --admin-bg: #1F2937;
     --admin-card: #fff;
     --admin-text: #222;
-    --admin-accent: #7c3aed;
+    --admin-accent: #58CC02;
     --admin-border: #e5e7eb;
     --admin-success: #22C55E;
     --admin-danger: #EF4444;
 }
 
+/* Layout principal */
 .cuerpo-admin {
     background: var(--admin-bg);
     min-height: 100vh;
     color: var(--admin-text);
 }
-
 .contenedor-admin {
     display: flex;
+    flex-direction: column;
     width: 100vw;
     min-height: 100vh;
 }
+@media (min-width: 768px) {
+    .contenedor-admin {
+        flex-direction: row;
+        align-items: stretch;
+    }
+    .barra-lateral-admin {
+        width: 17rem;
+        min-height: 100vh;
+    }
+    .contenido-principal-admin {
+        flex: 1;
+        min-height: 100vh;
+    }
+    .seccion-admin {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        display: block;
+    }
+}
 
+/* Menú lateral admin */
 .barra-lateral-admin {
-    width: 17rem;
-    background: var(--secondary-color);
+    background: var(--primary-color);
     color: #fff;
     padding: 1.5rem;
     display: flex;
@@ -54,11 +74,9 @@
     margin: 1.5rem 0;
     width: 100%;
 }
-
 .lista-modulos-admin li {
     margin-bottom: 0.5rem;
 }
-
 .modulo-link-admin {
     display: block;
     background: none;
@@ -70,10 +88,9 @@
     transition: background 0.2s;
     cursor: pointer;
 }
-
 .modulo-link-admin--activo,
 .modulo-link-admin:hover {
-    background: var(--admin-accent);
+    background: var(--secondary-color);
     color: #fff;
 }
 
@@ -88,78 +105,244 @@
     cursor: pointer;
     transition: background 0.2s;
 }
-
 .boton-logout-admin:hover {
     background: #e53935;
 }
 
+/* Secciones */
 .contenido-principal-admin {
     flex: 1;
     padding: 2.5rem;
     background: var(--admin-card);
     min-height: 100vh;
+    box-sizing: border-box;
 }
-
 .titulo-admin {
     font-size: 2rem;
     color: var(--secondary-color);
     font-weight: bold;
     margin-bottom: 1.5rem;
 }
-
 .seccion-admin {
     margin-bottom: 2.5rem;
     background: var(--admin-card);
     border-radius: 0.75rem;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     padding: 2rem;
+    width: 100%;
+    box-sizing: border-box;
+    max-width: unset;
+    min-width: 0;
+    display: block;
 }
-
 .seccion-admin--hidden {
     display: none;
 }
 
+/* Tabla admin */
 .admin-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 1rem;
     background: #fff;
-    border-radius: 0.5rem;
-    overflow: hidden;
+    border-radius: 0.75rem;
+    overflow-x: auto;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
+    font-size: 1rem;
+    border: 2px solid #58CC02;
 }
-
-.admin-table th,
-.admin-table td {
-    padding: 0.75rem;
-    text-align: center;
-    border-bottom: 1px solid var(--admin-border);
-}
-
 .admin-table th {
-    background: var(--admin-bg);
+    background: #58CC02;
     color: #fff;
     font-weight: 700;
+    font-size: 1.1rem;
+    padding: 1rem 0.5rem;
 }
-
 .admin-table td {
     font-size: 1rem;
+    vertical-align: middle;
+    padding: 0.8rem 0.5rem;
 }
-
 .admin-table tr:last-child td {
     border-bottom: none;
 }
-
 .admin-table .estado-aprobado {
     color: var(--admin-success);
     font-weight: 700;
 }
-
 .admin-table .estado-reprobado {
     color: var(--admin-danger);
     font-weight: 700;
 }
 
+/* Botones tabla */
+.boton-eliminar-estudiante {
+    background: #EF4444;
+    color: #fff;
+    padding: 0.55rem 1.4rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(239,68,68,0.07);
+    transition: background 0.18s, transform 0.18s;
+    margin: 2px 0;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+.boton-eliminar-estudiante:hover {
+    background: #b91c1c;
+    transform: scale(1.08);
+}
+.boton-ver-detalle {
+    background: #58CC02;
+    color: #fff;
+    padding: 0.55rem 1.4rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(88,204,2,0.07);
+    transition: background 0.18s, transform 0.18s;
+    margin: 2px 0;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+.boton-ver-detalle:hover {
+    background: #2563eb;
+    transform: scale(1.08);
+}
+
+/* Select curso tabla */
+.curso-select {
+    border: 1px solid #58CC02;
+    border-radius: 0.4rem;
+    background: #f6fff6;
+    padding: 0.3rem 0.7rem;
+    font-size: 1rem;
+    color: #2563eb;
+    margin: 0.1rem 0;
+}
+
+/* ======================== RESPONSIVE CELULAR (iPhone SE, ≤ 400px) ======================== */
+@media (max-width: 400px) {
+    .contenedor-admin {
+        padding: 0 !important;
+        flex-direction: column;
+    }
+    .barra-lateral-admin {
+        width: 100vw !important;
+        min-width: 100vw !important;
+        max-width: 100vw !important;
+        padding: 0.8rem 0.5rem !important;
+        align-items: stretch !important;
+    }
+    .contenido-principal-admin {
+        padding: 0.6rem 0.2rem !important;
+        min-width: 100vw !important;
+        max-width: 100vw !important;
+        box-sizing: border-box;
+    }
+    .seccion-admin {
+        padding: 0.6rem 0.2rem !important;
+        margin-bottom: 1rem !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        min-width: 100vw !important;
+        border-radius: 0.35rem !important;
+        box-shadow: none !important;
+    }
+    .titulo-admin {
+        font-size: 1.1rem !important;
+        margin-bottom: 0.7rem !important;
+        text-align: left;
+    }
+    .admin-table {
+        font-size: 0.86rem !important;
+        margin-top: 0.4rem !important;
+        border-radius: 0.3rem !important;
+        min-width: 355px !important;
+        max-width: 100vw !important;
+        overflow-x: scroll !important;
+        box-shadow: none !important;
+    }
+    .admin-table th, .admin-table td {
+        padding: 0.44rem 0.18rem !important;
+        min-width: 95px !important;
+        font-size: 0.89rem !important;
+    }
+    .boton-eliminar-estudiante,
+    .boton-ver-detalle {
+        padding: 0.33rem 0.7rem !important;
+        font-size: 0.92rem !important;
+        min-width: 75px !important;
+    }
+    .curso-select {
+        font-size: 0.89rem !important;
+        padding: 0.15rem !important;
+        min-width: 70px !important;
+    }
+}
+
+/* ======================== RESPONSIVE TABLET/MOBILE (≤ 700px) ======================== */
+@media (max-width: 700px) {
+    .seccion-admin {
+        padding: 1rem 0.2rem;
+        margin-bottom: 1.2rem;
+    }
+    .admin-table {
+        font-size: 0.92rem;
+        padding: 0;
+        margin-top: 0.5rem;
+        border-radius: 0.5rem;
+        overflow-x: scroll;
+        min-width: 350px;
+    }
+    .admin-table th, .admin-table td {
+        padding: 0.65rem 0.2rem;
+        min-width: 110px;
+        font-size: 0.98rem;
+    }
+    .boton-eliminar-estudiante,
+    .boton-ver-detalle {
+        padding: 0.4rem 1rem;
+        font-size: 0.98rem;
+        min-width: 88px;
+    }
+    .curso-select {
+        font-size: 0.98rem;
+        padding: 0.22rem;
+        min-width: 90px;
+    }
+}
+
+/* ======================== MODULOS GRID ======================== */
+.modulos-grid-admin {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+    gap: 1.6rem;
+    margin-top: 2rem;
+}
+.modulo-card-admin {
+    background: #E6F9E6;
+    border-radius: 1rem;
+    box-shadow: 0 2px 12px rgba(44,165,78,0.08);
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.15s, box-shadow 0.15s;
+    cursor: pointer;
+    animation: popIn 0.5s;
+    border: 2px solid var(--primary-color);
+}
+.modulo-card-admin:hover { transform: scale(1.04); box-shadow: 0 8px 24px rgba(44,165,78,0.16); background: #d4fcd4; }
+@keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 80% { transform: scale(1.06); opacity: 1;} 100% { transform: scale(1); opacity: 1; } }
+.modulo-card-admin__title { font-size: 1.2rem; font-weight: bold; color: var(--secondary-color); margin-bottom: 0.5rem;}
+.modulo-card-admin__desc { color: #2563eb; font-size: 0.98rem; margin-bottom: 1.2rem;}
+.modulo-card-admin__icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
+/* Kahoot */
 .kahoot-card {
     padding: 1.5rem;
     background: var(--admin-bg);
@@ -168,11 +351,10 @@
     margin-bottom: 2rem;
     box-shadow: 0 4px 16px rgba(44, 165, 78, 0.12);
 }
-
 .kahoot-code {
     font-size: 2rem;
     font-weight: bold;
-    color: var(--tertiary-color);
+    color: #ffd600;
     letter-spacing: 0.15em;
     margin-bottom: 1rem;
     background: #222;
@@ -180,7 +362,6 @@
     padding: 0.6rem 1.3rem;
     display: inline-block;
 }
-
 .kahoot-join-list {
     margin-top: 1.5rem;
     background: #fff;
@@ -188,11 +369,9 @@
     padding: 1rem;
     color: var(--admin-text);
 }
-
 .kahoot-quiz-form {
     margin-top: 2rem;
 }
-
 .kahoot-quiz-form input,
 .kahoot-quiz-form textarea {
     width: 100%;
@@ -203,7 +382,6 @@
     font-size: 1rem;
     font-family: inherit;
 }
-
 .kahoot-quiz-form button {
     background: var(--admin-accent);
     color: #fff;
@@ -215,7 +393,6 @@
     cursor: pointer;
     transition: background 0.2s;
 }
-
 .kahoot-quiz-form button:hover {
     background: var(--secondary-color);
 }
