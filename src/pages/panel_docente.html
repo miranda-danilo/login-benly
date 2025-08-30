@@ -4,11 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Docente - Benly</title>
-    
+  
     <script type="module" src="../app/docente_interface.js"></script>
 </head>
 <body class="cuerpo-admin">
     <div class="contenedor-admin">
+        <!-- Hamburguesa móvil -->
+        <button id="mobile-hamburger-btn" class="mobile-hamburger-btn" aria-label="Menú">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <nav id="mobile-hamburger-menu" class="mobile-hamburger-menu">
+            <ul id="mobile-menu-list" class="mobile-menu-list"></ul>
+        </nav>
+        <!-- Menú lateral (solo desktop) -->
         <aside class="barra-lateral-admin">
             <div class="barra-lateral__encabezado-admin">
                 <img id="admin-photo" class="barra-lateral__foto-admin" alt="Foto de docente">

@@ -2,134 +2,131 @@ import { auth, db } from "./conexion_firebase.js";
 import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 import { collection, doc, getDoc, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
-/**
- * Panel Docente: Menú único "Módulos" que muestra el grid de los 6 módulos, clic para ver cada uno, responsive.
- */
-export function setupAdminPanelLogic(panelElement, adminRole) {
-    // --- Módulos, cada uno con tema, vocabulario + imagen, ejemplos, diálogo + imagen ---
-    const modules = [
-        {
-            id: 'UT1',
-            title: 'Introduction and Basic Greetings',
-            icon: '👋',
-            desc: 'Saludos y presentaciones',
-            vocabulario: [
-                { word: 'Hello', translation: 'Hola', img: 'assets/vocab_hello.png' },
-                { word: 'Goodbye', translation: 'Adiós', img: 'assets/vocab_goodbye.png' },
-                { word: 'Morning', translation: 'Mañana', img: 'assets/vocab_morning.png' },
-            ],
-            ejemplos: [
-                { sentence: 'Hello! How are you?', img: 'assets/ejemplo_hello.png' },
-                { sentence: 'Good morning, teacher.', img: 'assets/ejemplo_morning.png' },
-                { sentence: 'Goodbye, friends!', img: 'assets/ejemplo_goodbye.png' }
-            ],
-            dialogo: {
-                text: "A: Hello! Good morning.\nB: Good morning! How are you?\nA: I am fine, thank you.",
-                img: "assets/dialogo_ut1.png"
-            }
-        },
-        {
-            id: 'UT2',
-            title: 'People and Places',
-            icon: '🏠',
-            desc: 'Familia y lugares',
-            vocabulario: [
-                { word: 'Father', translation: 'Padre', img: 'assets/vocab_father.png' },
-                { word: 'City', translation: 'Ciudad', img: 'assets/vocab_city.png' },
-                { word: 'Home', translation: 'Casa', img: 'assets/vocab_home.png' }
-            ],
-            ejemplos: [
-                { sentence: 'My father is at home.', img: 'assets/ejemplo_father.png' },
-                { sentence: 'We live in the city.', img: 'assets/ejemplo_city.png' },
-                { sentence: 'Welcome home!', img: 'assets/ejemplo_home.png' }
-            ],
-            dialogo: {
-                text: "A: Where is your father?\nB: He is at home.\nA: Do you live in this city?\nB: Yes, I do.",
-                img: "assets/dialogo_ut2.png"
-            }
-        },
-        {
-            id: 'UT3',
-            title: 'Daily Life',
-            icon: '⏰',
-            desc: 'Rutinas diarias',
-            vocabulario: [
-                { word: 'Wake up', translation: 'Despertarse', img: 'assets/vocab_wakeup.png' },
-                { word: 'Breakfast', translation: 'Desayuno', img: 'assets/vocab_breakfast.png' },
-                { word: 'Never', translation: 'Nunca', img: 'assets/vocab_never.png' }
-            ],
-            ejemplos: [
-                { sentence: 'I always eat breakfast.', img: 'assets/ejemplo_breakfast.png' },
-                { sentence: 'She wakes up early.', img: 'assets/ejemplo_wakeup.png' },
-                { sentence: 'He never goes to bed late.', img: 'assets/ejemplo_never.png' }
-            ],
-            dialogo: {
-                text: "A: What do you do in the morning?\nB: I wake up and eat breakfast.\nA: Do you ever skip breakfast?\nB: Never!",
-                img: "assets/dialogo_ut3.png"
-            }
-        },
-        {
-            id: 'UT4',
-            title: 'Foods and Drinks',
-            icon: '🍎',
-            desc: 'Comidas y bebidas',
-            vocabulario: [
-                { word: 'Fruit', translation: 'Fruta', img: 'assets/vocab_fruit.png' },
-                { word: 'Bread', translation: 'Pan', img: 'assets/vocab_bread.png' },
-                { word: 'Juice', translation: 'Jugo', img: 'assets/vocab_juice.png' }
-            ],
-            ejemplos: [
-                { sentence: 'I like fruit juice.', img: 'assets/ejemplo_juice.png' },
-                { sentence: 'She eats bread.', img: 'assets/ejemplo_bread.png' },
-                { sentence: 'Banana is a fruit.', img: 'assets/ejemplo_fruit.png' }
-            ],
-            dialogo: {
-                text: "A: What do you eat for breakfast?\nB: Bread and fruit.\nA: Do you drink juice?\nB: Yes, I do.",
-                img: "assets/dialogo_ut4.png"
-            }
-        },
-        {
-            id: 'UT5',
-            title: 'Things I Have',
-            icon: '📱',
-            desc: 'Objetos personales',
-            vocabulario: [
-                { word: 'Phone', translation: 'Teléfono', img: 'assets/vocab_phone.png' },
-                { word: 'Bag', translation: 'Bolsa', img: 'assets/vocab_bag.png' },
-                { word: 'Keys', translation: 'Llaves', img: 'assets/vocab_keys.png' }
-            ],
-            ejemplos: [
-                { sentence: 'I have a phone.', img: 'assets/ejemplo_phone.png' },
-                { sentence: 'My keys are in my bag.', img: 'assets/ejemplo_keys.png' },
-                { sentence: 'She has a new bag.', img: 'assets/ejemplo_bag.png' }
-            ],
-            dialogo: {
-                text: "A: Do you have your keys?\nB: Yes, they are in my bag.\nA: And your phone?\nB: I have it too.",
-                img: "assets/dialogo_ut5.png"
-            }
-        },
-        {
-            id: 'UT6',
-            title: 'Around Town - Free Time',
-            icon: '🏞️',
-            desc: 'Lugares y ocio',
-            vocabulario: [
-                { word: 'Park', translation: 'Parque', img: 'assets/vocab_park.png' },
-                { word: 'Cinema', translation: 'Cine', img: 'assets/vocab_cinema.png' },
-                { word: 'Bank', translation: 'Banco', img: 'assets/vocab_bank.png' }
-            ],
-            ejemplos: [
-                { sentence: 'I go to the park.', img: 'assets/ejemplo_park.png' },
-                { sentence: 'She works at the bank.', img: 'assets/ejemplo_bank.png' },
-                { sentence: 'We watch movies at the cinema.', img: 'assets/ejemplo_cinema.png' }
-            ],
-            dialogo: {
-                text: "A: Where do you go in your free time?\nB: I go to the cinema or the park.\nA: Do you work at the bank?\nB: Yes, I do.",
-                img: "assets/dialogo_ut6.png"
-            }
+// Los módulos con imágenes y contenido
+const modules = [
+    {
+        id: 'UT1',
+        title: 'Introduction and Basic Greetings',
+        icon: '👋',
+        img: 'assets/vocab_hello.png',
+        vocabulario: [
+            { word: 'Hello', translation: 'Hola', img: 'assets/vocab_hello.png' },
+            { word: 'Goodbye', translation: 'Adiós', img: 'assets/vocab_goodbye.png' },
+            { word: 'Morning', translation: 'Mañana', img: 'assets/vocab_morning.png' },
+        ],
+        ejemplos: [
+            { sentence: 'Hello! How are you?', img: 'assets/ejemplo_hello.png' },
+            { sentence: 'Good morning, teacher.', img: 'assets/ejemplo_morning.png' },
+            { sentence: 'Goodbye, friends!', img: 'assets/ejemplo_goodbye.png' }
+        ],
+        dialogo: {
+            text: "A: Hello! Good morning.\nB: Good morning! How are you?\nA: I am fine, thank you.",
+            img: "assets/dialogo_ut1.png"
         }
-    ];
+    },
+    {
+        id: 'UT2',
+        title: 'People and Places',
+        icon: '🏠',
+        img: 'assets/vocab_father.png',
+        vocabulario: [
+            { word: 'Father', translation: 'Padre', img: 'assets/vocab_father.png' },
+            { word: 'City', translation: 'Ciudad', img: 'assets/vocab_city.png' },
+            { word: 'Home', translation: 'Casa', img: 'assets/vocab_home.png' }
+        ],
+        ejemplos: [
+            { sentence: 'My father is at home.', img: 'assets/ejemplo_father.png' },
+            { sentence: 'We live in the city.', img: 'assets/ejemplo_city.png' },
+            { sentence: 'Welcome home!', img: 'assets/ejemplo_home.png' }
+        ],
+        dialogo: {
+            text: "A: Where is your father?\nB: He is at home.\nA: Do you live in this city?\nB: Yes, I do.",
+            img: "assets/dialogo_ut2.png"
+        }
+    },
+    {
+        id: 'UT3',
+        title: 'Daily Life',
+        icon: '⏰',
+        img: 'assets/vocab_wakeup.png',
+        vocabulario: [
+            { word: 'Wake up', translation: 'Despertarse', img: 'assets/vocab_wakeup.png' },
+            { word: 'Breakfast', translation: 'Desayuno', img: 'assets/vocab_breakfast.png' },
+            { word: 'Never', translation: 'Nunca', img: 'assets/vocab_never.png' }
+        ],
+        ejemplos: [
+            { sentence: 'I always eat breakfast.', img: 'assets/ejemplo_breakfast.png' },
+            { sentence: 'She wakes up early.', img: 'assets/ejemplo_wakeup.png' },
+            { sentence: 'He never goes to bed late.', img: 'assets/ejemplo_never.png' }
+        ],
+        dialogo: {
+            text: "A: What do you do in the morning?\nB: I wake up and eat breakfast.\nA: Do you ever skip breakfast?\nB: Never!",
+            img: "assets/dialogo_ut3.png"
+        }
+    },
+    {
+        id: 'UT4',
+        title: 'Foods and Drinks',
+        icon: '🍎',
+        img: 'assets/vocab_fruit.png',
+        vocabulario: [
+            { word: 'Fruit', translation: 'Fruta', img: 'assets/vocab_fruit.png' },
+            { word: 'Bread', translation: 'Pan', img: 'assets/vocab_bread.png' },
+            { word: 'Juice', translation: 'Jugo', img: 'assets/vocab_juice.png' }
+        ],
+        ejemplos: [
+            { sentence: 'I like fruit juice.', img: 'assets/ejemplo_juice.png' },
+            { sentence: 'She eats bread.', img: 'assets/ejemplo_bread.png' },
+            { sentence: 'Banana is a fruit.', img: 'assets/ejemplo_fruit.png' }
+        ],
+        dialogo: {
+            text: "A: What do you eat for breakfast?\nB: Bread and fruit.\nA: Do you drink juice?\nB: Yes, I do.",
+            img: "assets/dialogo_ut4.png"
+        }
+    },
+    {
+        id: 'UT5',
+        title: 'Things I Have',
+        icon: '📱',
+        img: 'assets/vocab_phone.png',
+        vocabulario: [
+            { word: 'Phone', translation: 'Teléfono', img: 'assets/vocab_phone.png' },
+            { word: 'Bag', translation: 'Bolsa', img: 'assets/vocab_bag.png' },
+            { word: 'Keys', translation: 'Llaves', img: 'assets/vocab_keys.png' }
+        ],
+        ejemplos: [
+            { sentence: 'I have a phone.', img: 'assets/ejemplo_phone.png' },
+            { sentence: 'My keys are in my bag.', img: 'assets/ejemplo_keys.png' },
+            { sentence: 'She has a new bag.', img: 'assets/ejemplo_bag.png' }
+        ],
+        dialogo: {
+            text: "A: Do you have your keys?\nB: Yes, they are in my bag.\nA: And your phone?\nB: I have it too.",
+            img: "assets/dialogo_ut5.png"
+        }
+    },
+    {
+        id: 'UT6',
+        title: 'Around Town - Free Time',
+        icon: '🏞️',
+        img: 'assets/vocab_park.png',
+        vocabulario: [
+            { word: 'Park', translation: 'Parque', img: 'assets/vocab_park.png' },
+            { word: 'Cinema', translation: 'Cine', img: 'assets/vocab_cinema.png' },
+            { word: 'Bank', translation: 'Banco', img: 'assets/vocab_bank.png' }
+        ],
+        ejemplos: [
+            { sentence: 'I go to the park.', img: 'assets/ejemplo_park.png' },
+            { sentence: 'She works at the bank.', img: 'assets/ejemplo_bank.png' },
+            { sentence: 'We watch movies at the cinema.', img: 'assets/ejemplo_cinema.png' }
+        ],
+        dialogo: {
+            text: "A: Where do you go in your free time?\nB: I go to the cinema or the park.\nA: Do you work at the bank?\nB: Yes, I do.",
+            img: "assets/dialogo_ut6.png"
+        }
+    }
+];
 
+export function setupAdminPanelLogic(panelElement, adminRole) {
     // DOM refs
     const moduleList = document.getElementById('module-list-admin');
     const moduloContent = document.getElementById('modulo-content-admin');
@@ -143,10 +140,48 @@ export function setupAdminPanelLogic(panelElement, adminRole) {
     const adminRoleSpan = document.getElementById("admin-role");
     const adminPhoto = document.getElementById("admin-photo");
 
-    // --- Menú lateral único: Modulos, Estudiantes, Progreso ---
+    // ----------- MENÚ HAMBURGUESA MOBILE ----------
+    const hamburgerBtn = document.getElementById('mobile-hamburger-btn');
+    const hamburgerMenu = document.getElementById('mobile-hamburger-menu');
+    const mobileMenuList = document.getElementById('mobile-menu-list');
+
+    function renderMobileMenu() {
+        mobileMenuList.innerHTML = '';
+        [
+            { id: 'modulos', label: 'Módulos', section: moduloSection },
+            { id: 'estudiantes', label: 'Gestión de Estudiantes', section: estudiantesSection },
+            { id: 'progreso', label: 'Monitorear Progreso', section: progresoSection }
+        ].forEach(opt => {
+            const li = document.createElement('li');
+            li.innerHTML = `<button class="mobile-menu-link">${opt.label}</button>`;
+            mobileMenuList.appendChild(li);
+            li.querySelector('button').onclick = () => {
+                if (opt.id === 'modulos') { renderModulosGrid(); }
+                if (opt.id === 'estudiantes') { renderEstudiantesContent(); }
+                if (opt.id === 'progreso') { renderProgresoContent(); }
+                showSection(opt.section);
+                hamburgerMenu.style.display = "none";
+                hamburgerBtn.style.display = "flex";
+            };
+        });
+    }
+    if (hamburgerBtn && hamburgerMenu) {
+        hamburgerBtn.addEventListener('click', () => {
+            renderMobileMenu();
+            hamburgerMenu.style.display = "flex";
+            hamburgerBtn.style.display = "none";
+        });
+        hamburgerMenu.addEventListener('click', (e) => {
+            if (e.target === hamburgerMenu) {
+                hamburgerMenu.style.display = "none";
+                hamburgerBtn.style.display = "flex";
+            }
+        });
+    }
+    // ----------- MENÚ LATERAL DESKTOP -----------
     function renderMenu() {
         moduleList.innerHTML = '';
-        // Opción única "Módulos"
+        // Módulos
         const liModulos = document.createElement('li');
         liModulos.innerHTML = `<a href="#" class="modulo-link-admin" id="admin-modulos-link">Módulos</a>`;
         moduleList.appendChild(liModulos);
@@ -183,17 +218,18 @@ export function setupAdminPanelLogic(panelElement, adminRole) {
         });
     }
 
-    // Mostrar solo la sección activa
+    // Solo la sección activa
     function showSection(section) {
         [moduloSection, estudiantesSection, progresoSection].forEach(sec => sec.classList.add('seccion-admin--hidden'));
         section.classList.remove('seccion-admin--hidden');
     }
 
-    // --- MÓDULOS: grid de 6 tarjetas ---
+    // ----------- GRID DE MÓDULOS -----------
     function renderModulosGrid() {
         moduloContent.innerHTML = `<div class="modulos-grid-admin">` +
             modules.map(mod => `
                 <div class="modulo-card-admin" data-module-id="${mod.id}">
+                    <img src="${mod.img}" alt="${mod.title}" class="modulo-card-admin__img"/>
                     <div class="modulo-card-admin__icon">${mod.icon}</div>
                     <div class="modulo-card-admin__title">${mod.title}</div>
                     <div class="modulo-card-admin__desc">${mod.desc}</div>
@@ -206,7 +242,7 @@ export function setupAdminPanelLogic(panelElement, adminRole) {
         });
     }
 
-    // --- MODULO DETALLE: estructura completa y funcional ---
+    // ----------- DETALLE DE MÓDULO -----------
     function renderModuloDetalle(moduleId) {
         const mod = modules.find(m => m.id === moduleId);
         if (!mod) {
@@ -216,7 +252,7 @@ export function setupAdminPanelLogic(panelElement, adminRole) {
         moduloContent.innerHTML = `
             <div class="modulo-detalle-admin">
                 <div class="modulo-detalle__tema">${mod.title}</div>
-                <div class="modulo-detalle__vocabulario">
+                <div class="modulo-detalle__apartado">
                     <h3>Vocabulario</h3>
                     <div class="vocabulario-grid-admin">
                         ${mod.vocabulario.map((v, i) => `
@@ -227,9 +263,10 @@ export function setupAdminPanelLogic(panelElement, adminRole) {
                             </div>
                         `).join('')}
                     </div>
-                    <button class="vocab-audio-btn-admin" id="vocab-audio-btn-all-${mod.id}" style="margin-top:1rem;">🔊 Reproducir vocabulario</button>
+                    <button class="vocab-audio-btn-admin" id="vocab-audio-btn-all-${mod.id}">🔊 Reproducir Vocabulario</button>
+                    <button class="vocab-audio-btn-admin" id="vocab-audio-btn-stop-${mod.id}">⏹️ Detener</button>
                 </div>
-                <div class="modulo-detalle__ejemplos">
+                <div class="modulo-detalle__apartado">
                     <h3>Ejemplos</h3>
                     <div class="ejemplo-grid-admin">
                         ${mod.ejemplos.map((e, i) => `
@@ -239,58 +276,57 @@ export function setupAdminPanelLogic(panelElement, adminRole) {
                             </div>
                         `).join('')}
                     </div>
-                    <button class="ejemplo-audio-btn-admin" id="ejemplo-audio-btn-all-${mod.id}" style="margin-top:1rem;">🔊 Reproducir ejemplos</button>
+                    <button class="ejemplo-audio-btn-admin" id="ejemplo-audio-btn-all-${mod.id}">🔊 Reproducir Ejemplos</button>
+                    <button class="ejemplo-audio-btn-admin" id="ejemplo-audio-btn-stop-${mod.id}">⏹️ Detener</button>
                 </div>
-                <div class="modulo-detalle__dialogo">
+                <div class="modulo-detalle__apartado">
+                    <h3>Diálogo</h3>
                     <img src="${mod.dialogo.img}" alt="Diálogo" class="dialogo-img-admin">
                     <span class="dialogo-text-admin" style="display:block; margin-bottom:8px; white-space:pre-line;">${mod.dialogo.text}</span>
-                    <button class="dialogo-audio-btn-admin" id="dialogo-audio-btn-${mod.id}">🔊 Reproducir diálogo</button>
+                    <button class="dialogo-audio-btn-admin" id="dialogo-audio-btn-${mod.id}">🔊 Reproducir Diálogo</button>
+                    <button class="dialogo-audio-btn-admin" id="dialogo-audio-btn-stop-${mod.id}">⏹️ Detener</button>
                 </div>
                 <button class="boton-accion" id="volver-modulos">Volver</button>
             </div>
         `;
         document.getElementById('volver-modulos').onclick = renderModulosGrid;
 
-        // Audio vocabulario todo
-        const vocabAllBtn = document.getElementById(`vocab-audio-btn-all-${mod.id}`);
-        if (vocabAllBtn) {
-            vocabAllBtn.onclick = () => {
-                const texto = mod.vocabulario.map(v => v.word).join('. ');
-                const utter = new window.SpeechSynthesisUtterance(texto);
-                utter.lang = 'en-US';
-                window.speechSynthesis.speak(utter);
-            };
-        }
-        // Audio ejemplos todos
-        const ejemplosAllBtn = document.getElementById(`ejemplo-audio-btn-all-${mod.id}`);
-        if (ejemplosAllBtn) {
-            ejemplosAllBtn.onclick = () => {
-                const texto = mod.ejemplos.map(e => e.sentence).join('. ');
-                const utter = new window.SpeechSynthesisUtterance(texto);
-                utter.lang = 'en-US';
-                window.speechSynthesis.speak(utter);
-            };
-        }
-        // Audio diálogo
-        const dialogoBtn = document.getElementById(`dialogo-audio-btn-${mod.id}`);
-        if (dialogoBtn) {
-            dialogoBtn.onclick = () => {
-                const texto = mod.dialogo.text.replace(/\n/g, '. ');
-                const utter = new window.SpeechSynthesisUtterance(texto);
-                utter.lang = 'en-US';
-                window.speechSynthesis.speak(utter);
-            };
-        }
+        // --- AUDIO VOCABULARIO ---
+        let vocabUtter;
+        document.getElementById(`vocab-audio-btn-all-${mod.id}`).onclick = () => {
+            vocabUtter = new window.SpeechSynthesisUtterance(mod.vocabulario.map(v => v.word).join('. '));
+            vocabUtter.lang = 'en-US';
+            window.speechSynthesis.speak(vocabUtter);
+        };
+        document.getElementById(`vocab-audio-btn-stop-${mod.id}`).onclick = () => window.speechSynthesis.cancel();
+
+        // --- AUDIO EJEMPLOS ---
+        let ejemplosUtter;
+        document.getElementById(`ejemplo-audio-btn-all-${mod.id}`).onclick = () => {
+            ejemplosUtter = new window.SpeechSynthesisUtterance(mod.ejemplos.map(e => e.sentence).join('. '));
+            ejemplosUtter.lang = 'en-US';
+            window.speechSynthesis.speak(ejemplosUtter);
+        };
+        document.getElementById(`ejemplo-audio-btn-stop-${mod.id}`).onclick = () => window.speechSynthesis.cancel();
+
+        // --- AUDIO DIÁLOGO ---
+        let dialogoUtter;
+        document.getElementById(`dialogo-audio-btn-${mod.id}`).onclick = () => {
+            dialogoUtter = new window.SpeechSynthesisUtterance(mod.dialogo.text.replace(/\n/g, '. '));
+            dialogoUtter.lang = 'en-US';
+            window.speechSynthesis.speak(dialogoUtter);
+        };
+        document.getElementById(`dialogo-audio-btn-stop-${mod.id}`).onclick = () => window.speechSynthesis.cancel();
     }
 
-    // --- GESTIÓN DE ESTUDIANTES ---
+    // ----------- GESTIÓN DE ESTUDIANTES -----------
     async function renderEstudiantesContent() {
         estudiantesContent.innerHTML = '<p style="color:#2563eb;">Cargando estudiantes...</p>';
         const usuariosRef = collection(db, 'usuarios');
         const snapshot = await getDocs(usuariosRef);
-        let html = `<table class="admin-table" style="border:2px solid #58CC02;">
+        let html = `<div style="overflow-x:auto;"><table class="admin-table">
             <thead>
-                <tr style="background:#58CC02;color:#fff;">
+                <tr>
                     <th>Nombre</th>
                     <th>Email</th>
                     <th>Curso</th>
@@ -304,18 +340,18 @@ export function setupAdminPanelLogic(panelElement, adminRole) {
                 <td>${data.name || '-'}</td>
                 <td>${data.email || '-'}</td>
                 <td>
-                    <select class="curso-select" data-uid="${docu.id}" style="border:1px solid #58CC02;">
+                    <select class="curso-select" data-uid="${docu.id}">
                         <option value="">Sin curso</option>
                         <option value="Primero A"${data.curso === 'Primero A' ? ' selected' : ''}>Primero A</option>
                         <option value="Primero B"${data.curso === 'Primero B' ? ' selected' : ''}>Primero B</option>
                     </select>
                 </td>
                 <td>
-                   <button class="boton-eliminar-estudiante" data-uid="${docu.id}">Eliminar</button>
+                    <button class="boton-eliminar-estudiante" data-uid="${docu.id}">Eliminar</button>
                 </td>
             </tr>`;
         });
-        html += '</tbody></table>';
+        html += '</tbody></table></div>';
         estudiantesContent.innerHTML = html;
         estudiantesContent.querySelectorAll('.curso-select').forEach(select => {
             select.addEventListener('change', async () => {
@@ -335,7 +371,7 @@ export function setupAdminPanelLogic(panelElement, adminRole) {
         });
     }
 
-    // --- MONITOREAR PROGRESO ---
+    // ----------- MONITOREAR PROGRESO -----------
     async function renderProgresoContent() {
         progresoContent.innerHTML = `
             <label for="curso-progreso" style="font-weight:700;color:#2563eb;">Selecciona curso:</label>
@@ -350,9 +386,9 @@ export function setupAdminPanelLogic(panelElement, adminRole) {
         async function cargarEstudiantesProgreso(curso) {
             const usuariosRef = collection(db, 'usuarios');
             const snapshot = await getDocs(usuariosRef);
-            let lista = `<table class="admin-table" style="border:2px solid #58CC02;">
+            let lista = `<div style="overflow-x:auto;"><table class="admin-table">
                 <thead>
-                    <tr style="background:#58CC02;color:#fff;">
+                    <tr>
                         <th>Nombre</th>
                         <th>Email</th>
                         <th>Acciones</th>
@@ -366,12 +402,12 @@ export function setupAdminPanelLogic(panelElement, adminRole) {
                         <td>${data.name || '-'}</td>
                         <td>${data.email || '-'}</td>
                         <td>
-                           <button class="boton-ver-detalle" data-uid="${docu.id}">Ver progreso</button>
+                            <button class="boton-ver-detalle" data-uid="${docu.id}">Ver progreso</button>
                         </td>
                     </tr>`;
                 }
             });
-            lista += '</tbody></table>';
+            lista += '</tbody></table></div>';
             document.getElementById('progreso-lista-estudiantes').innerHTML = lista;
             document.querySelectorAll('.boton-ver-detalle').forEach(btn => {
                 btn.addEventListener('click', async () => {
@@ -380,8 +416,8 @@ export function setupAdminPanelLogic(panelElement, adminRole) {
                     const data = docSnap.data();
                     const scores = data.scores || {};
                     let detalle = `<h3 style="color:#2563eb;">Calificaciones de ${data.name || data.email}</h3>
-                        <table class="admin-table" style="border:2px solid #58CC02;">
-                        <thead><tr style="background:#58CC02;color:#fff;"><th>Unidad</th><th>Puntaje</th><th>Estado</th></tr></thead><tbody>`;
+                        <div style="overflow-x:auto;"><table class="admin-table">
+                        <thead><tr><th>Unidad</th><th>Puntaje</th><th>Estado</th></tr></thead><tbody>`;
                     Object.entries(scores).forEach(([unidad, obj]) => {
                         detalle += `<tr>
                             <td>${unidad}</td>
@@ -391,7 +427,7 @@ export function setupAdminPanelLogic(panelElement, adminRole) {
                             </td>
                         </tr>`;
                     });
-                    detalle += '</tbody></table><button id="cerrar-detalle-progreso" class="boton-accion" style="background:#2563eb;color:#fff;">Cerrar</button>';
+                    detalle += '</tbody></table></div><button id="cerrar-detalle-progreso" class="boton-accion" style="background:#2563eb;color:#fff;">Cerrar</button>';
                     document.getElementById('progreso-detalle-admin').innerHTML = detalle;
                     document.getElementById('cerrar-detalle-progreso').onclick = () => document.getElementById('progreso-detalle-admin').innerHTML = "";
                 });
@@ -401,7 +437,7 @@ export function setupAdminPanelLogic(panelElement, adminRole) {
         cargarEstudiantesProgreso(selectCurso.value);
     }
 
-    // --- INICIALIZACIÓN y perfil ---
+    // ----------- INICIALIZACIÓN y perfil -----------
     onAuthStateChanged(auth, (user) => {
         if (user) {
             if (adminNameSpan) adminNameSpan.textContent = user.displayName || user.email || "Docente";
@@ -417,7 +453,7 @@ export function setupAdminPanelLogic(panelElement, adminRole) {
         }
     });
 
-    // --- Cerrar sesión ---
+    // ----------- Cerrar sesión -----------
     if (logoutBtn) {
         logoutBtn.addEventListener("click", async () => {
             await signOut(auth);
