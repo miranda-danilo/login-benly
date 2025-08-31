@@ -10,18 +10,18 @@ const modules = [
         icon: '👋',
         img: 'assets/vocab_hello.png',
         vocabulario: [
-            { word: 'Hello', translation: 'Hola', img: 'assets/vocab_hello.png' },
-            { word: 'Goodbye', translation: 'Adiós', img: 'assets/vocab_goodbye.png' },
-            { word: 'Morning', translation: 'Mañana', img: 'assets/vocab_morning.png' },
+            { word: 'Hello', translation: 'Hola', img: 'https://img.freepik.com/foto-gratis/retrato-amigable-joven-feliz-que-despide-mano-decir-hola-saludandote-gesto-saludo-diciendo-adios-pie-sobre-pared-blanca_176420-39098.jpg?t=st=1756572182~exp=1756575782~hmac=2f8801a7a0dc2db3277d3cb2911074a2d58cb6dbf6b3517f1290eea4efae0b8f&w=740' },
+            { word: 'Goodbye', translation: 'Adiós', img: 'https://img.freepik.com/vector-gratis/dibujado-mano-gente-diseno-plano-agitando-ilustracion_23-2149195759.jpg?t=st=1756572484~exp=1756576084~hmac=94a5846474760eceaeb5a0df044380855a91c3d2cfc107b86fd60afbe2542b77&w=740' },
+            { word: 'Morning', translation: 'Buenos días', img: 'https://img.freepik.com/fotos-premium/buenas-mananas-desayuno-cafe-jugo-vista-increible_1000823-79557.jpg?w=740' },
         ],
         ejemplos: [
-            { sentence: 'Hello! How are you?', img: 'assets/ejemplo_hello.png' },
-            { sentence: 'Good morning, teacher.', img: 'assets/ejemplo_morning.png' },
-            { sentence: 'Goodbye, friends!', img: 'assets/ejemplo_goodbye.png' }
+            { sentence: 'Hello! How are you?', img: 'https://o.quizlet.com/gwCKeJ1nuXqyzkGS5EBWPg.png' },
+            { sentence: 'Good morning, teacher.', img: 'https://st3.depositphotos.com/27811286/32131/v/450/depositphotos_321311754-stock-illustration-happy-cute-kid-give-flower.jpg' },
+            { sentence: 'Goodbye, friends!', img: 'https://www.thesingingwalrus.com/wp-content/uploads/2022/02/Goodbye-Friends-thumb-541x305-1.jpeg' }
         ],
         dialogo: {
             text: "A: Hello! Good morning.\nB: Good morning! How are you?\nA: I am fine, thank you.",
-            img: "assets/dialogo_ut1.png"
+            img: "https://img.freepik.com/vector-premium/dos-personas-hablando-reunion-amigos-o-colegas-ilustracion-vectorial_1014921-830.jpg"
         }
     },
     {
@@ -30,18 +30,18 @@ const modules = [
         icon: '🏠',
         img: 'assets/vocab_father.png',
         vocabulario: [
-            { word: 'Father', translation: 'Padre', img: 'assets/vocab_father.png' },
-            { word: 'City', translation: 'Ciudad', img: 'assets/vocab_city.png' },
-            { word: 'Home', translation: 'Casa', img: 'assets/vocab_home.png' }
+            { word: 'Father', translation: 'Padre', img: 'https://cdn.pixabay.com/photo/2017/08/05/21/23/people-2585733_1280.jpg' },
+            { word: 'City', translation: 'Ciudad', img: 'https://cdn.pixabay.com/photo/2018/09/06/18/30/sofia-3658934_1280.jpg' },
+            { word: 'Home', translation: 'Casa', img: 'https://cdn.pixabay.com/photo/2012/11/19/16/26/house-66627_1280.jpg' }
         ],
         ejemplos: [
-            { sentence: 'My father is at home.', img: 'assets/ejemplo_father.png' },
-            { sentence: 'We live in the city.', img: 'assets/ejemplo_city.png' },
-            { sentence: 'Welcome home!', img: 'assets/ejemplo_home.png' }
+            { sentence: 'My father is at home.', img: 'https://cdn.pixabay.com/photo/2017/08/06/12/59/baby-2592302_1280.jpg' },
+            { sentence: 'We live in the city.', img: 'https://cdn.pixabay.com/photo/2013/11/27/06/17/hanam-city-219143_1280.jpg' },
+            { sentence: 'Welcome home!', img: 'https://cdn.pixabay.com/photo/2016/02/07/23/42/home-1185860_1280.jpg' }
         ],
         dialogo: {
             text: "A: Where is your father?\nB: He is at home.\nA: Do you live in this city?\nB: Yes, I do.",
-            img: "assets/dialogo_ut2.png"
+            img: "https://img.freepik.com/foto-gratis/hembras-felices-descansan-pausa-cafe-discuten-su-proyecto-futuro-usan-computadora-portatil-moderna-mejores-amigos-encuentran-cafeteria-miran-alegria-tienen-conversacion-agradable_273609-2620.jpg?t=st=1756573395~exp=1756576995~hmac=13c456264783482026c40758fddfdcf4e25f1032a34e3649e421d9586964c4dc&w=1480"
         }
     },
     {
@@ -50,18 +50,18 @@ const modules = [
         icon: '⏰',
         img: 'assets/vocab_wakeup.png',
         vocabulario: [
-            { word: 'Wake up', translation: 'Despertarse', img: 'assets/vocab_wakeup.png' },
-            { word: 'Breakfast', translation: 'Desayuno', img: 'assets/vocab_breakfast.png' },
-            { word: 'Never', translation: 'Nunca', img: 'assets/vocab_never.png' }
+            { word: 'Wake up', translatxion: 'Despertarse', img: 'https://cdn.pixabay.com/photo/2016/03/31/19/19/alarm-1294909_1280.png' },
+            { word: 'Breakfast', translation: 'Desayuno', img: 'https://img.freepik.com/fotos-premium/plato-desayuno-fresco-saludable-huevos-tocino-tostadas-salchichas-comenzar-dia_817921-2778.jpg?w=740' },
+            { word: 'Never', translation: 'Nunca', img: 'https://img.freepik.com/foto-gratis/mujer-joven-da-retroalimentacion-negativa-muestra-pulgar-abajo-desaprueba-producto-no-gusta-algo-malo-esta_1258-218639.jpg?t=st=1756575023~exp=1756578623~hmac=01d016325a8afb4bf9dbeb6e4fe5cac30968670ad93f15538bf5d676603163ba&w=740' }
         ],
         ejemplos: [
-            { sentence: 'I always eat breakfast.', img: 'assets/ejemplo_breakfast.png' },
-            { sentence: 'She wakes up early.', img: 'assets/ejemplo_wakeup.png' },
-            { sentence: 'He never goes to bed late.', img: 'assets/ejemplo_never.png' }
+            { sentence: 'I always eat breakfast.', img: 'https://img.freepik.com/foto-gratis/imagen-mujer-encantadora-que-huele-croissant_197531-33948.jpg?t=st=1756575084~exp=1756578684~hmac=25b3116d479caf4e2c2db92b14ca79e87887575fa74a7374f20f097f069af150&w=740' },
+            { sentence: 'She wakes up early.', img: 'https://img.freepik.com/foto-gratis/bella-dama-satisfecha-buen-sueno-habitacion-hotel_1163-5175.jpg?t=st=1756575155~exp=1756578755~hmac=562878c17a444dafaf173801541d565d1941bf63d4e4f691e44417d60bc40c7d&w=740' },
+            { sentence: 'He never goes to bed late.', img: 'https://images.pexels.com/photos/3771069/pexels-photo-3771069.jpeg' }
         ],
         dialogo: {
             text: "A: What do you do in the morning?\nB: I wake up and eat breakfast.\nA: Do you ever skip breakfast?\nB: Never!",
-            img: "assets/dialogo_ut3.png"
+            img: "https://img.freepik.com/foto-gratis/captura-recortada-pareja-sonriente-desayunando-manana_171337-4939.jpg?t=st=1756575483~exp=1756579083~hmac=465faf2ce8c1e342134495f57ff42bfcb41bbe136834de79b943523b943d75a0&w=740"
         }
     },
     {
@@ -70,18 +70,18 @@ const modules = [
         icon: '🍎',
         img: 'assets/vocab_fruit.png',
         vocabulario: [
-            { word: 'Fruit', translation: 'Fruta', img: 'assets/vocab_fruit.png' },
-            { word: 'Bread', translation: 'Pan', img: 'assets/vocab_bread.png' },
-            { word: 'Juice', translation: 'Jugo', img: 'assets/vocab_juice.png' }
+            { word: 'Fruit', translation: 'Fruta', img: 'https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg' },
+            { word: 'Bread', translation: 'Pan', img: 'https://images.pexels.com/photos/209206/pexels-photo-209206.jpeg' },
+            { word: 'Juice', translation: 'Jugo', img: 'https://images.pexels.com/photos/158053/fresh-orange-juice-squeezed-refreshing-citrus-158053.jpeg' }
         ],
         ejemplos: [
-            { sentence: 'I like fruit juice.', img: 'assets/ejemplo_juice.png' },
-            { sentence: 'She eats bread.', img: 'assets/ejemplo_bread.png' },
-            { sentence: 'Banana is a fruit.', img: 'assets/ejemplo_fruit.png' }
+            { sentence: 'I like fruit juice.', img: 'https://img.freepik.com/psd-gratis/jugos-frutas-refrescantes-deliciosa-mezcla-citricos-opcion-estilo-vida-saludable_191095-90526.jpg?t=st=1756575826~exp=1756579426~hmac=7173db0ebb01b453fe2e08245607af259df849c8cf40fc2f40b5d0fdfef22832&w=740https://img.freepik.com/foto-gratis/variedad-batidos-coloridos-ingredientes-frescos_23-2151989778.jpg?t=st=1756575905~exp=1756579505~hmac=7a9de9167f2f5b86af50109e71af4958673f2816bcd0dd23651dd67b4c38d53c&w=740' },
+            { sentence: 'She eats bread.', img: 'https://img.freepik.com/foto-gratis/persona-autentica-comiendo-queso-fresco_23-2150220460.jpg?t=st=1756575951~exp=1756579551~hmac=920b6f2f78b747052f399a4f3012476e16ab91f521eb87dcb79d0a5106ea2274&w=740' },
+            { sentence: 'Banana is a fruit.', img: 'https://img.freepik.com/vector-gratis/vector-racimo-platano-amarillo-maduro-aislado-sobre-fondo-blanco_1284-45456.jpg?t=st=1756576112~exp=1756579712~hmac=e7c17da13c56311cc3fed7378ca1f09da26b4d3054e84d4847ff65ecac528b2d&w=740' }
         ],
         dialogo: {
             text: "A: What do you eat for breakfast?\nB: Bread and fruit.\nA: Do you drink juice?\nB: Yes, I do.",
-            img: "assets/dialogo_ut4.png"
+            img: "https://images.pexels.com/photos/33674442/pexels-photo-33674442.jpeg"
         }
     },
     {
@@ -90,18 +90,18 @@ const modules = [
         icon: '📱',
         img: 'assets/vocab_phone.png',
         vocabulario: [
-            { word: 'Phone', translation: 'Teléfono', img: 'assets/vocab_phone.png' },
-            { word: 'Bag', translation: 'Bolsa', img: 'assets/vocab_bag.png' },
-            { word: 'Keys', translation: 'Llaves', img: 'assets/vocab_keys.png' }
+            { word: 'Phone', translation: 'Teléfono', img: 'https://images.pexels.com/photos/607812/pexels-photo-607812.jpegg' },
+            { word: 'Bag', translation: 'Bolsa', img: 'https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg' },
+            { word: 'Keys', translation: 'Llaves', img: 'https://images.pexels.com/photos/14721/pexels-photo.jpg' }
         ],
         ejemplos: [
-            { sentence: 'I have a phone.', img: 'assets/ejemplo_phone.png' },
-            { sentence: 'My keys are in my bag.', img: 'assets/ejemplo_keys.png' },
-            { sentence: 'She has a new bag.', img: 'assets/ejemplo_bag.png' }
+            { sentence: 'I have a phone.', img: 'https://img.freepik.com/foto-gratis/retrato-mujer-hermosa-sosteniendo-celda-moderna-aislada-sobre-pared-gris_114579-59392.jpg?t=st=1756576511~exp=1756580111~hmac=9d0c799c299bd1b013ee2c7550d65eafe0040cad8979c193f0e1ab31fa116499&w=740' },
+            { sentence: 'My keys are in my bag.', img: 'https://img.freepik.com/foto-gratis/detalle-peluquero-herramientas_23-2148108837.jpg?t=st=1756576555~exp=1756580155~hmac=7135e63a1a65308a76e3a08169972ac191c20b60fef164e05328ec5932d70f71&w=740' },
+            { sentence: 'She has a new bag.', img: 'https://img.freepik.com/fotos-premium/hermosa-mujer-cabello-afro-sonriendo-espacio-libre-anuncios-texto-publicidad_432566-14049.jpg?w=740' }
         ],
         dialogo: {
             text: "A: Do you have your keys?\nB: Yes, they are in my bag.\nA: And your phone?\nB: I have it too.",
-            img: "assets/dialogo_ut5.png"
+            img: "https://img.freepik.com/fotos-premium/bolso-cuero-elegante-telefono-inteligente-llaves-banco_638202-11192.jpg?w=740"
         }
     },
     {
@@ -110,18 +110,18 @@ const modules = [
         icon: '🏞️',
         img: 'assets/vocab_park.png',
         vocabulario: [
-            { word: 'Park', translation: 'Parque', img: 'assets/vocab_park.png' },
-            { word: 'Cinema', translation: 'Cine', img: 'assets/vocab_cinema.png' },
-            { word: 'Bank', translation: 'Banco', img: 'assets/vocab_bank.png' }
+            { word: 'Park', translation: 'Parque', img: 'https://img.freepik.com/psd-premium/renderizacion-3d-patio-recreo_23-2150659735.jpg' },
+            { word: 'Cinema', translation: 'Cine', img: 'https://images.pexels.com/photos/109669/pexels-photo-109669.jpeg' },
+            { word: 'Bank', translation: 'Banco', img: 'https://img.freepik.com/vector-premium/edificio-banco-ilustraciones-billetes-monedas-concepto-ahorro-dinero-banco-vectorial-aislado_338371-1874.jpg?w=1480' }
         ],
         ejemplos: [
-            { sentence: 'I go to the park.', img: 'assets/ejemplo_park.png' },
-            { sentence: 'She works at the bank.', img: 'assets/ejemplo_bank.png' },
-            { sentence: 'We watch movies at the cinema.', img: 'assets/ejemplo_cinema.png' }
+            { sentence: 'I go to the park.', img: 'https://img.freepik.com/foto-gratis/mujer-joven-relajada-descansando-cerca-arbol-sentado-parque-cesped-sombra-sonriendo-luciendo-feliz_1258-126100.jpg?t=st=1756660711~exp=1756664311~hmac=7adf021cf090e7fcafd84b35f016810cae9f267b0a6677ac50e30a66bc14a77e&w=1480' },
+            { sentence: 'She works at the bank.', img: 'https://img.freepik.com/foto-gratis/vista-frontal-joven-bella-dama-camisa-gris-trabajando-documentos-computadora-portatil-sentado-dentro-su-oficina-dia-actividad-laboral-edificio_140725-15140.jpg?t=st=1756660788~exp=1756664388~hmac=6fe0484f80ec777485ad0b43e4b32ed3bd4a527ff73e6ac2865a24a12f0949ee&w=1480' },
+            { sentence: 'We watch movies at the cinema.', img: 'https://img.freepik.com/fotos-premium/concepto-cine-entretenimiento-personas-amigos-felices-viendo-peliculas-teatro_380164-91585.jpg?w=1480' }
         ],
         dialogo: {
             text: "A: Where do you go in your free time?\nB: I go to the cinema or the park.\nA: Do you work at the bank?\nB: Yes, I do.",
-            img: "assets/dialogo_ut6.png"
+            img: "https://img.freepik.com/foto-gratis/senora-rubia-refinada-pantalones-cortos-negros-riendo-parque-magnifica-chica-europea-taza-cafe-jugando-fin-semana-verano_197531-19992.jpg?t=st=1756661519~exp=1756665119~hmac=1400e9f32c71adc562bb0f90cc19f2b7f7e215d2d386b64892e14a7261040036&w=1480"
         }
     }
 ];
@@ -227,9 +227,10 @@ export function setupAdminPanelLogic(panelElement, adminRole) {
     // ----------- GRID DE MÓDULOS -----------
     function renderModulosGrid() {
         moduloContent.innerHTML = `<div class="modulos-grid-admin">` +
-            modules.map(mod => `
+         /*   <img src="${mod.img}" alt="${mod.title}" class="modulo-card-admin__img"/>  */   
+        modules.map(mod => `
                 <div class="modulo-card-admin" data-module-id="${mod.id}">
-                    <img src="${mod.img}" alt="${mod.title}" class="modulo-card-admin__img"/>
+                    
                     <div class="modulo-card-admin__icon">${mod.icon}</div>
                     <div class="modulo-card-admin__title">${mod.title}</div>
                     <div class="modulo-card-admin__desc">${mod.desc}</div>

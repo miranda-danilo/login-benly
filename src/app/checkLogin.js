@@ -172,7 +172,10 @@ export const stateChanged = () => {
                 console.log("cumple el try de logout")
 
                 await signOut(auth);
-               
+
+                const menuAdmin = document.getElementById("mobile-hamburger-btn");
+               /* menuAdmin.style.background = "red"; */
+                menuAdmin.style.display = "none";
                 // Asegúrate de que los modales están cerrados
                 if (loginModal) {
                     loginModal.close();
