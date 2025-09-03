@@ -95,20 +95,9 @@ const quizData = {
         { question: "Basic greetings include 'hello' and 'goodbye'.", answer: "true" },
         { question: "'Good afternoon' is used at night.", answer: "false" },
         { question: "Family vocabulary includes 'father', 'mother', 'brother'.", answer: "true" },
-        { question: "'Son' means 'hija' en español.", answer: "false" }
+        { question: "'Son' means 'hija' in Spanish.", answer: "false" }
     ],
 };
-
-const moduleInfo = [
-    { id: 'UT1', title: 'UNIT 1', desc: 'Introduction and Greetings', icon: '👋', img: 'https://img.freepik.com/foto-gratis/retrato-amigable-joven-feliz-que-despide-mano-decir-hola-saludandote-gesto-saludo-diciendo-adios-pie-sobre-pared-blanca_176420-39098.jpg?t=st=1756572182~exp=1756575782~hmac=2f8801a7a0dc2db3277d3cb2911074a2d58cb6dbf6b3517f1290eea4efae0b8f&w=740' },
-    { id: 'UT2', title: 'UNIT 2', desc: 'People and Places', icon: '🏠', img: 'https://cdn.pixabay.com/photo/2018/09/06/18/30/sofia-3658934_1280.jpg' },
-    { id: 'UT3', title: 'UNIT 3', desc: 'Daily Life', icon: '⏰', img: 'https://images.pexels.com/photos/3771069/pexels-photo-3771069.jpeg' },
-    { id: 'UT4', title: 'UNIT 4', desc: 'Food and Drinks', icon: '🍎', img: 'https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg' },
-    { id: 'UT5', title: 'UNIT 5', desc: 'Things I Have', icon: '📱', img: 'https://images.pexels.com/photos/607812/pexels-photo-607812.jpegg' },
-    { id: 'UT6', title: 'UNIT 6', desc: 'Around the City', icon: '🏞️', img: 'https://img.freepik.com/psd-premium/renderizacion-3d-patio-recreo_23-2150659735.jpg' },
-];
-
-
 
 // --- Variables Globales (o de ámbito superior) ---
 let userScores = {}; // Para almacenar los puntajes del usuario
@@ -129,11 +118,10 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
     const userPhoto = panelElement?.querySelector("#user-photo");
     const logoutBtn = document.getElementById("logout-btn");
     const unitList = document.getElementById('unit-list');
+    const mainContent = document.getElementById('main-content');
     const unitSections = document.querySelectorAll('.seccion-unidad');
     const MobileUnitList = document.getElementById('mobile-unit-list');
-    const gradesSection = document.getElementById('grades-section');
-    const modulesSection = document.getElementById('modules-section');
-    const modulesGrid = document.getElementById('modules-grid');
+    const gradesSection = document.getElementById('grades-section'); // Se inicializa si no existe
 
     // Elementos del menú móvil
     const hamburgerBtn = document.getElementById('mobile-hamburger-btn');
@@ -211,6 +199,10 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
             const placeholderPhoto = `https://placehold.co/80x80/E2E8F0/A0AEC0?text=${initials}`;
             const sidebarPlaceholderPhoto = `https://placehold.co/48x48/E2E8F0/A0AEC0?text=${initials}`;
 
+            if (userEmailSpan) userEmailSpan.textContent = displayName;
+            if (userPhoto) userPhoto.src = photoURL || placeholderPhoto;
+            if (userRoleSpan && userRole) userRoleSpan.textContent = userRole;
+
             const sidebarName = document.getElementById("sidebar-student-name");
             const sidebarRole = document.getElementById("sidebar-student-role");
             const sidebarPhoto = document.getElementById("sidebar-photo");
@@ -220,6 +212,8 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
             if (sidebarPhoto) sidebarPhoto.src = photoURL || sidebarPlaceholderPhoto;
         } else {
             // Estado no autenticado
+            if (userEmailSpan) userEmailSpan.textContent = "Usuario";
+            if (userPhoto) userPhoto.src = "https://placehold.co/80x80/E2E8F0/A0AEC0?text=U";
             const sidebarName = document.getElementById("sidebar-student-name");
             const sidebarRole = document.getElementById("sidebar-student-role");
             if (sidebarName) sidebarName.textContent = "Inglés A1";
@@ -227,50 +221,6 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
             const sidebarPhoto = document.getElementById("sidebar-photo");
             if (sidebarPhoto) sidebarPhoto.src = "https://placehold.co/48x48/E2E8F0/A0AEC0?text=U";
         }
-    };
-
-    /**
-     * Muestra una sección específica y oculta las demás.
-     * @param {HTMLElement} sectionToShow - La sección que se va a mostrar.
-     */
-    const showSection = (sectionToShow) => {
-        // Oculta todas las secciones
-        unitSections.forEach(section => section.classList.add('seccion-unidad--oculta'));
-        
-        // Muestra la sección correcta
-        if (sectionToShow) {
-            sectionToShow.classList.remove('seccion-unidad--oculta');
-        } 
-        
-         // Actualiza la clase activa en el menú
-        document.querySelectorAll('.unidad-link').forEach(link => link.classList.remove('unidad-link--activo'));
-        const activeLink = document.querySelector(`[data-section-id="${sectionToShow.id}"]`);
-        if (activeLink) activeLink.classList.add('unidad-link--activo');
-    };
-
-    /**
-     * Renderiza el grid de tarjetas de módulos.
-     */
-    const renderModulesGrid = () => {
-        if (!modulesGrid) return;
-        modulesGrid.innerHTML = '';
-        const learningUnits = units.filter(unit => unit.id.startsWith('UT'));
-        learningUnits.forEach(unit => {
-            const info = moduleInfo.find(m => m.id === unit.id) || {};
-            const card = document.createElement('div');
-            card.className = 'modulo-card';
-            card.innerHTML = `
-                <div class="modulo-card__icon">${info.icon}</div>
-                <div class="modulo-card__title">${info.title || unit.title}</div>
-                <div class="modulo-card__desc">${info.desc || ''}</div>
-                <button class="boton-accion" data-unit-id="${unit.id}">Ver Módulo</button>
-            `;
-            modulesGrid.appendChild(card);
-            card.querySelector('.boton-accion').addEventListener('click', () => {
-                renderUnitContent(unit.id);
-            });
-        });
-        showSection(modulesSection);
     };
 
     /**
@@ -501,10 +451,27 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
      * @param {string} unitId - ID de la unidad a renderizar.
      */
     const renderUnitContent = async (unitId) => {
-        showSection(document.getElementById(`unit-${unitId}`));
+        // Oculta paneles y secciones
+        if (panelElement) panelElement.style.display = 'none';
+        if (gradesSection) gradesSection.classList.add('seccion-unidad--oculta');
+        unitSections.forEach(section => section.classList.add('seccion-unidad--oculta'));
 
-          const unitSection = document.getElementById(`unit-${unitId}`);
+        // Activa el enlace de la unidad seleccionada
+        document.querySelectorAll('.unidad-link').forEach(link => link.classList.remove('unidad-link--activo'));
+        const activeLink = document.querySelector(`[data-unit-id="${unitId}"]`);
+        if (activeLink) activeLink.classList.add('unidad-link--activo');
 
+        const unitSection = document.getElementById(`unit-${unitId}`);
+        if (!unitSection) {
+            mainContent.classList.remove('seccion-contenido--oculta');
+            mainContent.innerHTML = `
+                <h1 class="seccion-contenido__titulo">Unidad no encontrada.</h1>
+                <p class="seccion-contenido__subtitulo">Por favor, selecciona otra unidad.</p>
+            `;
+            return;
+        }
+
+        unitSection.classList.remove('seccion-unidad--oculta');
 
         // Lógica específica para la unidad WRITING
         if (unitId === 'WRITING') {
@@ -527,7 +494,7 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
                 `;
             }
         } else {
-             // Elimina quiz anterior si existe y crea uno nuevo para unidades no-WRITING
+            // Elimina quiz anterior si existe y crea uno nuevo para unidades no-WRITING
             const oldQuiz = unitSection.querySelector('.tarjeta-actividad');
             if (oldQuiz) oldQuiz.remove();
 
@@ -577,9 +544,6 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
                         stopBtn.classList.add('boton-audio--stop');
 
                         // Solo lee el texto en inglés, ignorando lo que está dentro de <span>
-                        const unitSection = document.getElementById(`unit-${unitId}`);
-                        if (!unitSection) return;
-
                         const leccionUl = unitSection.querySelector('.tarjeta-leccion ul');
                         const vocabularioUl = unitSection.querySelector('.tarjeta-vocabulario ul');
                         let texto = '';
@@ -666,7 +630,35 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
      * Renderiza la sección de calificaciones del usuario.
      */
     const renderGradesSection = () => {
-        showSection(gradesSection);
+        // Oculta paneles y secciones
+        if (panelElement) panelElement.style.display = 'none';
+        mainContent.classList.add('seccion-contenido--oculta');
+        unitSections.forEach(section => section.classList.add('seccion-unidad--oculta'));
+
+        // Crea la sección de calificaciones si no existe
+        let currentGradesSection = document.getElementById('grades-section');
+        if (!currentGradesSection) {
+            currentGradesSection = document.createElement('section');
+            currentGradesSection.id = 'grades-section';
+            currentGradesSection.className = 'seccion-unidad';
+            currentGradesSection.innerHTML = `
+                <div class="tarjeta-leccion">
+                    <h2 class="tarjeta-leccion__titulo">Calificaciones por Unidad</h2>
+                    <table class="tabla-calificaciones">
+                        <thead>
+                            <tr>
+                                <th>Unidad</th>
+                                <th>Puntaje más alto</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grades-table-body"></tbody>
+                    </table>
+                </div>
+            `;
+            mainContent.parentNode.appendChild(currentGradesSection);
+        }
+        currentGradesSection.classList.remove('seccion-unidad--oculta');
 
         // Rellena la tabla de calificaciones
         const tbody = document.getElementById("grades-table-body");
@@ -686,6 +678,11 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
                 tbody.appendChild(tr);
             });
         }
+
+        // Activa el enlace de calificaciones en el menú
+        document.querySelectorAll('.unidad-link').forEach(link => link.classList.remove('unidad-link--activo'));
+        const gradesTab = document.getElementById('grades-tab');
+        if (gradesTab) gradesTab.classList.add('unidad-link--activo');
     };
 
     /**
@@ -693,24 +690,12 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
      * @param {string} userId - ID del usuario actual.
      */
     const initializeDashboardUI = (userId) => {
-        if (!unitList) return;
+        if (!unitList) return; // Asegurarse de que unitList existe
 
         unitList.innerHTML = '';
-        
-        // Renderiza el botón "Módulos"
-        const modulesLi = document.createElement('li');
-        modulesLi.innerHTML = `<a href="#" data-section-id="modules-section" class="unidad-link">MÓDULOS</a>`;
-        unitList.appendChild(modulesLi);
-        modulesLi.querySelector('a')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            renderModulesGrid();
-        });
-
-        // Agrega las demás opciones de menú
-        const otherUnits = units.filter(unit => unit.id === 'WRITING' || unit.id.startsWith('EXAM'));
-        otherUnits.forEach(unit => {
-             const li = document.createElement('li');
-            li.innerHTML = `<a href="#" data-section-id="unit-${unit.id}" class="unidad-link">
+        units.forEach(unit => {
+            const li = document.createElement('li');
+            li.innerHTML = `<a href="#" data-unit-id="${unit.id}" class="unidad-link">
                                 <span class="unidad-link__id">${unit.id}:</span> ${unit.title}
                             </a>`;
             unitList.appendChild(li);
@@ -722,7 +707,7 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
 
         // Agrega opción de calificaciones al final del menú principal
         const gradesLi = document.createElement('li');
-        gradesLi.innerHTML = `<a href="#" data-section-id="grades-section" class="unidad-link unidad-link--calificaciones" id="grades-tab">
+        gradesLi.innerHTML = `<a href="#" id="grades-tab" class="unidad-link unidad-link--calificaciones">
             <span class="unidad-link__id">Calificaciones</span>
         </a>`;
         unitList.appendChild(gradesLi);
@@ -793,7 +778,7 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
                     }
                 };
 
-                const apiKey = "";
+                const apiKey = "AIzaSyDk6yjhp_DZ3gXUob4gID6vKrDLAaD-OGY"; // Considera mover esto a una variable de entorno
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
                 const response = await fetchWithRetry(apiUrl, {
@@ -875,8 +860,10 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
         updateProfileUI(user);
         if (user) {
             initializeDashboardUI(user.uid);
-            // Mostrar los módulos por defecto
-            renderModulesGrid();
+            // Mostrar pantalla de selección por defecto
+            mainContent?.classList.remove("seccion-contenido--oculta");
+            unitSections.forEach(section => section.classList.add('seccion-unidad--oculta'));
+            if (gradesSection) gradesSection.classList.add('seccion-unidad--oculta');
         }
     });
 
@@ -893,35 +880,48 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
         });
     }
 
+    // --- Evento de Audio para UT1 (Ejemplo, se puede generalizar si hay más audios estáticos) ---
+    const audioBtnUT1 = document.getElementById('audio-ut1');
+    if (audioBtnUT1) {
+        audioBtnUT1.addEventListener('click', () => {
+            const texto = `
+                I am a student.
+                He is a teacher.
+                You are friends.
+                Hello. Goodbye. Good morning. Good afternoon. Good evening. Good night.
+            `;
+            const utterance = new SpeechSynthesisUtterance(texto);
+            utterance.lang = 'en-US';
+            window.speechSynthesis.speak(utterance);
+        });
+    }
+
     // --- Menú Móvil Hamburguesa ---
     function renderHamburgerMenu() {
         if (!MobileUnitList) return; // Asegurarse de que MobileUnitList existe
 
         MobileUnitList.innerHTML = '';
-        const menuItems = [
-            { id: 'modules', title: 'Módulos', sectionId: 'modules-section' },
-            { id: 'WRITING', title: 'Práctica de Escritura', sectionId: 'unit-WRITING' },
-            { id: 'EXAM1', title: 'EXAMEN FINAL 1', sectionId: 'unit-EXAM1' },
-            { id: 'EXAM2', title: 'EXAMEN FINAL 2', sectionId: 'unit-EXAM2' },
-            { id: 'grades', title: 'Calificaciones', sectionId: 'grades-section' }
-        ];
-
-        menuItems.forEach(item => {
+        units.forEach(unit => {
             const li = document.createElement('li');
-            li.innerHTML = `<a href="#" data-section-id="${item.sectionId}" class="unidad-link">${item.title}</a>`;
+            li.innerHTML = `<a href="#" data-unit-id="${unit.id}" class="unidad-link">${unit.title}</a>`;
             MobileUnitList.appendChild(li);
             li.querySelector('a')?.addEventListener('click', (e) => {
                 e.preventDefault();
                 if (hamburgerMenu) hamburgerMenu.style.display = "none";
                 if (hamburgerBtn) hamburgerBtn.style.display = "flex";
-                if (item.id === 'modules') {
-                    renderModulesGrid();
-                } else {
-                    renderUnitContent(item.id);
-                }
+                renderUnitContent(unit.id);
             });
         });
 
+        const gradesLi = document.createElement('li');
+        gradesLi.innerHTML = `<a href="#" id="hamburger-grades-tab" class="unidad-link unidad-link--calificaciones">Calificaciones</a>`;
+        MobileUnitList.appendChild(gradesLi);
+        gradesLi.querySelector('a')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (hamburgerMenu) hamburgerMenu.style.display = "none";
+            if (hamburgerBtn) hamburgerBtn.style.display = "flex";
+            renderGradesSection();
+        });
         updateUnitCompletionStatus(MobileUnitList);
     }
 

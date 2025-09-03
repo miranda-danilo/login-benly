@@ -46,23 +46,32 @@
         </aside>
         <main class="contenido-principal">
             <section id="user-panel" class="panel-usuario">
-            
-               
+                <div class="panel-usuario__tarjeta">
+                    <img id="user-photo" class="panel-usuario__foto" alt="Foto de perfil">
+                    <div class="panel-usuario__info">
+                        <h1 class="panel-usuario__titulo">¡Hola, <span id="user-email">Estudiante</span>!</h1>
+                        <p class="panel-usuario__texto">Tu rol es: <span id="user-role"
+                                class="panel-usuario__rol"></span></p>
+                        <p class="panel-usuario__texto panel-usuario__texto--pequeño">Bienvenido a tu herramienta de
+                            aprendizaje de inglés A1.</p>
+
+                    </div>
+                </div>
                  <!-- La sección de módulos se mostrará aquí -->
                 <section id="modules-section" class="seccion-unidad seccion-unidad--oculta">
-                     <h2 class="titulo-user">PANEL DE MÓDULOS INTERACTIVOS</h2>
                      <h2 class="tarjeta-leccion__titulo">Selecciona un Módulo</h2>
                      <p class="tarjeta-leccion__texto">Elige una de las 6 unidades para comenzar a aprender.</p>
                      <div id="modules-grid" class="modulos-grid">
                         <!-- Las tarjetas de módulos se renderizarán aquí -->
                     </div>
                 </section>
-              
+                <div id="main-content" class="seccion-contenido">
+                    <!-- El contenido de las unidades se cargará aquí -->
+                </div>
             </section>
             
             <!-- Secciones de las unidades existentes (ocultas por defecto) -->
             <section id="unit-UT1" class="seccion-unidad seccion-unidad--oculta">
-                  <h2 class="titulo-user">UNIT 1: To Be & Greetings</h2>
                 <div class="audio-controls">
                     <button id="audio-play-ut1" class="boton-audio">▶️ Reproducir</button>
                     <button id="audio-pause-ut1" class="boton-audio boton-audio--pause">⏸️ Pausar</button>
@@ -119,7 +128,6 @@
             </section>
 
             <section id="unit-UT2" class="seccion-unidad seccion-unidad--oculta">
-                  <h2 class="titulo-user">UNIT 2: People and Places</h2>
                 <div class="audio-controls">
                     <button id="audio-play-ut2" class="boton-audio">▶️ Reproducir</button>
                     <button id="audio-pause-ut2" class="boton-audio boton-audio--pause">⏸️ Pausar</button>
@@ -168,7 +176,6 @@
             </section>
 
             <section id="unit-UT3" class="seccion-unidad seccion-unidad--oculta">
-                 <h2 class="titulo-user">UNIT 3: Daily Life</h2>
                 <div class="audio-controls">
                     <button id="audio-play-ut13" class="boton-audio">▶️ Reproducir</button>
                     <button id="audio-pause-ut3" class="boton-audio boton-audio--pause">⏸️ Pausar</button>
@@ -213,7 +220,6 @@
             </section>
 
             <section id="unit-UT4" class="seccion-unidad seccion-unidad--oculta">
-                <h2 class="titulo-user">UNIT 4: Food and Drinks</h2>
                 <div class="audio-controls">
                     <button id="audio-play-ut4" class="boton-audio">▶️ Reproducir</button>
                     <button id="audio-pause-ut4" class="boton-audio boton-audio--pause">⏸️ Pausar</button>
@@ -255,7 +261,6 @@
             </section>
 
             <section id="unit-UT5" class="seccion-unidad seccion-unidad--oculta">
-                <h2 class="titulo-user">UNIT 5: Things I Have</h2>
                 <div class="audio-controls">
                     <button id="audio-play-ut5" class="boton-audio">▶️ Reproducir</button>
                     <button id="audio-pause-ut5" class="boton-audio boton-audio--pause">⏸️ Pausar</button>
@@ -299,7 +304,6 @@
             </section>
 
             <section id="unit-UT6" class="seccion-unidad seccion-unidad--oculta">
-                <h2 class="titulo-user">UNIT 6: Around the City</h2>
                 <div class="audio-controls">
                     <button id="audio-play-ut6" class="boton-audio">▶️ Reproducir</button>
                     <button id="audio-pause-ut6" class="boton-audio boton-audio--pause">⏸️ Pausar</button>
@@ -342,7 +346,6 @@
 
             <!-- EXAMEN 1: FIRST TERM EXAMEN - Solo test -->
             <section id="unit-EXAM1" class="seccion-unidad seccion-unidad--oculta">
-                <h2 class="titulo-user">FIRST TERM EXAMEN</h2>
                 <div class="tarjeta-actividad">
                     <h2 class="tarjeta-actividad__subtitulo">FIRST TERM EXAMEN</h2>
                     <p class="tarjeta-actividad__texto">Examen del primer término - Unidades 1-3</p>
@@ -359,7 +362,6 @@
 
             <!-- EXAMEN 2: SECOND TERM EXAMEN - Solo test -->
             <section id="unit-EXAM2" class="seccion-unidad seccion-unidad--oculta">
-                <h2 class="titulo-user">SECOND TERM EXAMEN</h2>
                 <div class="tarjeta-actividad">
                     <h2 class="tarjeta-actividad__subtitulo">SECOND TERM EXAMEN</h2>
                     <p class="tarjeta-actividad__texto">Examen del segundo término - Unidades 4-6</p>
@@ -375,7 +377,6 @@
             </section>
             
             <section id="grades-section" class="seccion-unidad seccion-unidad--oculta">
-                <h2 class="titulo-user">CALIFICACIONES</h2>
                 <div class="tarjeta-leccion">
                     <h2 class="tarjeta-leccion__titulo">Calificaciones por Unidad</h2>
                     <table class="tabla-calificaciones">
@@ -392,7 +393,6 @@
             </section>
 
             <section id="unit-WRITING" class="seccion-unidad seccion-unidad--oculta">
-                <h2 class="titulo-user">PRACTICA DE ESCRITURA CON IA</h2>
                 <div class="tarjeta-leccion">
                     <h2 class="tarjeta-leccion__titulo">Práctica de Escritura</h2>
                     <p class="tarjeta-leccion__texto">Escribe una oración en inglés y la IA de Gemini la corregirá por

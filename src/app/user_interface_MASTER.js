@@ -100,14 +100,13 @@ const quizData = {
 };
 
 const moduleInfo = [
-    { id: 'UT1', title: 'UNIT 1', desc: 'Introduction and Greetings', icon: '👋', img: 'https://img.freepik.com/foto-gratis/retrato-amigable-joven-feliz-que-despide-mano-decir-hola-saludandote-gesto-saludo-diciendo-adios-pie-sobre-pared-blanca_176420-39098.jpg?t=st=1756572182~exp=1756575782~hmac=2f8801a7a0dc2db3277d3cb2911074a2d58cb6dbf6b3517f1290eea4efae0b8f&w=740' },
-    { id: 'UT2', title: 'UNIT 2', desc: 'People and Places', icon: '🏠', img: 'https://cdn.pixabay.com/photo/2018/09/06/18/30/sofia-3658934_1280.jpg' },
-    { id: 'UT3', title: 'UNIT 3', desc: 'Daily Life', icon: '⏰', img: 'https://images.pexels.com/photos/3771069/pexels-photo-3771069.jpeg' },
-    { id: 'UT4', title: 'UNIT 4', desc: 'Food and Drinks', icon: '🍎', img: 'https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg' },
-    { id: 'UT5', title: 'UNIT 5', desc: 'Things I Have', icon: '📱', img: 'https://images.pexels.com/photos/607812/pexels-photo-607812.jpegg' },
-    { id: 'UT6', title: 'UNIT 6', desc: 'Around the City', icon: '🏞️', img: 'https://img.freepik.com/psd-premium/renderizacion-3d-patio-recreo_23-2150659735.jpg' },
+    { id: 'UT1', title: 'Unidad 1', desc: 'Introducción y Saludos', icon: '👋', img: 'https://img.freepik.com/foto-gratis/retrato-amigable-joven-feliz-que-despide-mano-decir-hola-saludandote-gesto-saludo-diciendo-adios-pie-sobre-pared-blanca_176420-39098.jpg?t=st=1756572182~exp=1756575782~hmac=2f8801a7a0dc2db3277d3cb2911074a2d58cb6dbf6b3517f1290eea4efae0b8f&w=740' },
+    { id: 'UT2', title: 'Unidad 2', desc: 'Personas y Lugares', icon: '🏠', img: 'https://cdn.pixabay.com/photo/2018/09/06/18/30/sofia-3658934_1280.jpg' },
+    { id: 'UT3', title: 'Unidad 3', desc: 'Vida Diaria', icon: '⏰', img: 'https://images.pexels.com/photos/3771069/pexels-photo-3771069.jpeg' },
+    { id: 'UT4', title: 'Unidad 4', desc: 'Comidas y Bebidas', icon: '🍎', img: 'https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg' },
+    { id: 'UT5', title: 'Unidad 5', desc: 'Cosas que Tengo', icon: '📱', img: 'https://images.pexels.com/photos/607812/pexels-photo-607812.jpegg' },
+    { id: 'UT6', title: 'Unidad 6', desc: 'Por la Ciudad', icon: '🏞️', img: 'https://img.freepik.com/psd-premium/renderizacion-3d-patio-recreo_23-2150659735.jpg' },
 ];
-
 
 
 // --- Variables Globales (o de ámbito superior) ---
@@ -129,6 +128,7 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
     const userPhoto = panelElement?.querySelector("#user-photo");
     const logoutBtn = document.getElementById("logout-btn");
     const unitList = document.getElementById('unit-list');
+    const mainContent = document.getElementById('main-content');
     const unitSections = document.querySelectorAll('.seccion-unidad');
     const MobileUnitList = document.getElementById('mobile-unit-list');
     const gradesSection = document.getElementById('grades-section');
@@ -211,6 +211,10 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
             const placeholderPhoto = `https://placehold.co/80x80/E2E8F0/A0AEC0?text=${initials}`;
             const sidebarPlaceholderPhoto = `https://placehold.co/48x48/E2E8F0/A0AEC0?text=${initials}`;
 
+            if (userEmailSpan) userEmailSpan.textContent = displayName;
+            if (userPhoto) userPhoto.src = photoURL || placeholderPhoto;
+            if (userRoleSpan && userRole) userRoleSpan.textContent = userRole;
+
             const sidebarName = document.getElementById("sidebar-student-name");
             const sidebarRole = document.getElementById("sidebar-student-role");
             const sidebarPhoto = document.getElementById("sidebar-photo");
@@ -220,6 +224,8 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
             if (sidebarPhoto) sidebarPhoto.src = photoURL || sidebarPlaceholderPhoto;
         } else {
             // Estado no autenticado
+            if (userEmailSpan) userEmailSpan.textContent = "Usuario";
+            if (userPhoto) userPhoto.src = "https://placehold.co/80x80/E2E8F0/A0AEC0?text=U";
             const sidebarName = document.getElementById("sidebar-student-name");
             const sidebarRole = document.getElementById("sidebar-student-role");
             if (sidebarName) sidebarName.textContent = "Inglés A1";
@@ -235,7 +241,8 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
      */
     const showSection = (sectionToShow) => {
         // Oculta todas las secciones
-        unitSections.forEach(section => section.classList.add('seccion-unidad--oculta'));
+        const allSections = document.querySelectorAll('.seccion-unidad, .seccion-contenido');
+        allSections.forEach(section => section.classList.add('seccion-unidad--oculta'));
         
         // Muestra la sección correcta
         if (sectionToShow) {
@@ -503,9 +510,6 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
     const renderUnitContent = async (unitId) => {
         showSection(document.getElementById(`unit-${unitId}`));
 
-          const unitSection = document.getElementById(`unit-${unitId}`);
-
-
         // Lógica específica para la unidad WRITING
         if (unitId === 'WRITING') {
             let writingProgressDiv = document.getElementById("writingProgressDiv");
@@ -527,30 +531,38 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
                 `;
             }
         } else {
-             // Elimina quiz anterior si existe y crea uno nuevo para unidades no-WRITING
-            const oldQuiz = unitSection.querySelector('.tarjeta-actividad');
-            if (oldQuiz) oldQuiz.remove();
+            // Elimina quiz anterior si existe y crea uno nuevo para unidades no-WRITING
+            const quizContainerId = `quiz-container-${unitId}`;
+            let quizDiv = document.getElementById(quizContainerId);
 
-            const quizDiv = document.createElement('div');
-            quizDiv.className = 'tarjeta-actividad';
-            const isExam = unitId === 'EXAM1' || unitId === 'EXAM2';
-            const infoText = isExam ? 'El examen solo se podrá dar una vez.‼️‼️' : 'Solo se guardará tu nota más alta en este test.';
+            // Si el quiz no existe, lo creamos
+            if (!quizDiv) {
+                const unitSection = document.getElementById(`unit-${unitId}`);
+                quizDiv = document.createElement('div');
+                quizDiv.className = 'tarjeta-actividad';
+                const isExam = unitId === 'EXAM1' || unitId === 'EXAM2';
+                const infoText = isExam ? 'El examen solo se podrá dar una vez.‼️‼️' : 'Solo se guardará tu nota más alta en este test.';
 
-            quizDiv.innerHTML = `
-                <h3 class="tarjeta-actividad__subtitulo">Test Interactivo</h3>
-                <div class="quiz-progress-bar"><div id="quiz-progress-${unitId}" class="quiz-progress-bar-fill"></div></div>
-                <div id="quiz-container-${unitId}" class="contenedor-quiz">
-                    <p class="contenedor-quiz__pregunta" id="question-${unitId}"></p>
-                    <div class="contenedor-quiz__botones">
-                        <button class="boton-quiz boton-quiz--verdadero" data-answer="true">Verdadero</button>
-                        <button class="boton-quiz boton-quiz--falso" data-answer="false">Falso</button>
+                quizDiv.innerHTML = `
+                    <h3 class="tarjeta-actividad__subtitulo">Test Interactivo</h3>
+                    <div class="quiz-progress-bar"><div id="quiz-progress-${unitId}" class="quiz-progress-bar-fill"></div></div>
+                    <div id="${quizContainerId}" class="contenedor-quiz">
+                        <p class="contenedor-quiz__pregunta" id="question-${unitId}"></p>
+                        <div class="contenedor-quiz__botones">
+                            <button class="boton-quiz boton-quiz--verdadero" data-answer="true">Verdadero</button>
+                            <button class="boton-quiz boton-quiz--falso" data-answer="false">Falso</button>
+                        </div>
+                        <p id="feedback-${unitId}" class="contenedor-quiz__retroalimentacion"></p>
+                        <button id="repeat-quiz-${unitId}" class="boton-quiz--repeat" style="display:none;">Repetir Quiz</button>
+                        <p style="margin-top:1rem;font-weight:bold;"><b>${infoText}</b></p>
                     </div>
-                    <p id="feedback-${unitId}" class="contenedor-quiz__retroalimentacion"></p>
-                    <button id="repeat-quiz-${unitId}" class="boton-quiz--repeat" style="display:none;">Repetir Quiz</button>
-                    <p style="margin-top:1rem;font-weight:bold;"><b>${infoText}</b></p>
-                </div>
-            `;
-            unitSection.appendChild(quizDiv);
+                `;
+                if(unitSection) {
+                     const existingQuiz = unitSection.querySelector('.tarjeta-actividad');
+                     if(existingQuiz) existingQuiz.remove();
+                     unitSection.appendChild(quizDiv);
+                }
+            }
             setupTrueFalseQuiz(unitId);
         }
 
@@ -699,7 +711,7 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
         
         // Renderiza el botón "Módulos"
         const modulesLi = document.createElement('li');
-        modulesLi.innerHTML = `<a href="#" data-section-id="modules-section" class="unidad-link">MÓDULOS</a>`;
+        modulesLi.innerHTML = `<a href="#" data-section-id="modules-section" class="unidad-link">Módulos</a>`;
         unitList.appendChild(modulesLi);
         modulesLi.querySelector('a')?.addEventListener('click', (e) => {
             e.preventDefault();

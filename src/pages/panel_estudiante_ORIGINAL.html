@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Estudiante</title>
-    
     <script type="module" src="../app/user_interface.js"></script>
 </head>
 
@@ -39,30 +38,61 @@
 
 
             <nav class="barra-lateral__nav">
-                <ul id="unit-list" class="lista-unidades">
-                    <!-- Los enlaces del menú se renderizarán aquí -->
-                </ul>
+                <ul id="unit-list" class="lista-unidades"></ul>
             </nav>
         </aside>
         <main class="contenido-principal">
             <section id="user-panel" class="panel-usuario">
-            
-               
-                 <!-- La sección de módulos se mostrará aquí -->
-                <section id="modules-section" class="seccion-unidad seccion-unidad--oculta">
-                     <h2 class="titulo-user">PANEL DE MÓDULOS INTERACTIVOS</h2>
-                     <h2 class="tarjeta-leccion__titulo">Selecciona un Módulo</h2>
-                     <p class="tarjeta-leccion__texto">Elige una de las 6 unidades para comenzar a aprender.</p>
-                     <div id="modules-grid" class="modulos-grid">
-                        <!-- Las tarjetas de módulos se renderizarán aquí -->
+                <div class="panel-usuario__tarjeta">
+                    <img id="user-photo" class="panel-usuario__foto" alt="Foto de perfil">
+                    <div class="panel-usuario__info">
+                        <h1 class="panel-usuario__titulo">¡Hola, <span id="user-email">Estudiante</span>!</h1>
+                        <p class="panel-usuario__texto">Tu rol es: <span id="user-role"
+                                class="panel-usuario__rol"></span></p>
+                        <p class="panel-usuario__texto panel-usuario__texto--pequeño">Bienvenido a tu herramienta de
+                            aprendizaje de inglés A1.</p>
+
                     </div>
-                </section>
-              
+                </div>
+                <div id="main-content" class="seccion-contenido">
+                    <section id="hangman-section" class="seccion-unidad seccion-unidad--oculta">
+                        <h2 class="tarjeta-leccion__titulo">Juego de Ahorcado</h2>
+                        <div id="hangman-game">
+                            <p id="hangman-word"></p>
+                            <div id="hangman-letters"></div>
+                            <button id="hangman-guess-button">Adivinar</button>
+                            <input type="text" id="hangman-letter-input" maxlength="1"
+                                placeholder="Ingresa una letra" />
+                            <p id="hangman-message"></p>
+                        </div>
+                    </section>
+                    <h1 class="seccion-contenido__titulo">Selecciona una unidad</h1>
+                    <p class="seccion-contenido__subtitulo">Usa el menú lateral para comenzar a aprender y practicar.
+                    </p>
+                    <div class="seccion-contenido__ilustracion">
+                        <video src="assets/benlyy.mp4" autoplay muted loop width="640" Weight="360"
+                            style="border-radius:12px;"></video>
+                    </div>
+                </div>
             </section>
-            
-            <!-- Secciones de las unidades existentes (ocultas por defecto) -->
+            <section id="grades-section" class="seccion-unidad seccion-unidad--oculta">
+                <div class="tarjeta-leccion">
+                    <h2 class="tarjeta-leccion__titulo">Calificaciones por Unidad</h2>
+                    <table class="tabla-calificaciones">
+                        <thead>
+                            <tr>
+                                <th>Unidad</th>
+                                <th>Puntaje más alto</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grades-table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+            <!-- Secciones de las unidades: el contenido se mantiene pero los tests ahora están en todas las unidades -->
             <section id="unit-UT1" class="seccion-unidad seccion-unidad--oculta">
-                  <h2 class="titulo-user">UNIT 1: To Be & Greetings</h2>
+                <!-- Ejemplo para todas las unidades, pon esto dentro de cada <section id="unit-UTx" ...> -->
                 <div class="audio-controls">
                     <button id="audio-play-ut1" class="boton-audio">▶️ Reproducir</button>
                     <button id="audio-pause-ut1" class="boton-audio boton-audio--pause">⏸️ Pausar</button>
@@ -83,6 +113,8 @@
                     </ul>
                 </div>
                 <!-- Ejemplo dentro de la sección de vocabulario o lección -->
+
+
                 <div class="tarjeta-vocabulario">
                     <h2 class="tarjeta-vocabulario__titulo">Vocabulario Básico</h2>
                     <ul>
@@ -105,6 +137,16 @@
                     </div>
                 </div>
 
+                <!--     <div class="tarjeta-ejercicios">
+                    <h2 class="tarjeta-ejercicios__titulo">Ejercicio de escritura</h2>
+                    <p class="tarjeta-ejercicios__texto">Escribe una presentación usando "To Be".</p>
+                    <input type="text" class="seccion-habilidad__input" placeholder="Ej: I am Juan.">
+                </div>  -->
+
+
+                <!-- Nueva sección para el corrector de oraciones -->
+
+
                 <div class="tarjeta-actividad">
                     <h3 class="tarjeta-actividad__subtitulo">Test: Verdadero o Falso</h3>
                     <div id="quiz-container-UT1" class="contenedor-quiz">
@@ -117,9 +159,9 @@
                     </div>
                 </div>
             </section>
-
+            <!-- Repite la estructura para UT2 a UT6, cambiando el contenido y el test -->
             <section id="unit-UT2" class="seccion-unidad seccion-unidad--oculta">
-                  <h2 class="titulo-user">UNIT 2: People and Places</h2>
+                <!-- Ejemplo para todas las unidades, pon esto dentro de cada <section id="unit-UTx" ...> -->
                 <div class="audio-controls">
                     <button id="audio-play-ut2" class="boton-audio">▶️ Reproducir</button>
                     <button id="audio-pause-ut2" class="boton-audio boton-audio--pause">⏸️ Pausar</button>
@@ -168,7 +210,7 @@
             </section>
 
             <section id="unit-UT3" class="seccion-unidad seccion-unidad--oculta">
-                 <h2 class="titulo-user">UNIT 3: Daily Life</h2>
+                <!-- Ejemplo para todas las unidades, pon esto dentro de cada <section id="unit-UTx" ...> -->
                 <div class="audio-controls">
                     <button id="audio-play-ut13" class="boton-audio">▶️ Reproducir</button>
                     <button id="audio-pause-ut3" class="boton-audio boton-audio--pause">⏸️ Pausar</button>
@@ -213,7 +255,7 @@
             </section>
 
             <section id="unit-UT4" class="seccion-unidad seccion-unidad--oculta">
-                <h2 class="titulo-user">UNIT 4: Food and Drinks</h2>
+                <!-- Ejemplo para todas las unidades, pon esto dentro de cada <section id="unit-UTx" ...> -->
                 <div class="audio-controls">
                     <button id="audio-play-ut4" class="boton-audio">▶️ Reproducir</button>
                     <button id="audio-pause-ut4" class="boton-audio boton-audio--pause">⏸️ Pausar</button>
@@ -255,7 +297,7 @@
             </section>
 
             <section id="unit-UT5" class="seccion-unidad seccion-unidad--oculta">
-                <h2 class="titulo-user">UNIT 5: Things I Have</h2>
+                <!-- Ejemplo para todas las unidades, pon esto dentro de cada <section id="unit-UTx" ...> -->
                 <div class="audio-controls">
                     <button id="audio-play-ut5" class="boton-audio">▶️ Reproducir</button>
                     <button id="audio-pause-ut5" class="boton-audio boton-audio--pause">⏸️ Pausar</button>
@@ -299,7 +341,7 @@
             </section>
 
             <section id="unit-UT6" class="seccion-unidad seccion-unidad--oculta">
-                <h2 class="titulo-user">UNIT 6: Around the City</h2>
+                <!-- Ejemplo para todas las unidades, pon esto dentro de cada <section id="unit-UTx" ...> -->
                 <div class="audio-controls">
                     <button id="audio-play-ut6" class="boton-audio">▶️ Reproducir</button>
                     <button id="audio-pause-ut6" class="boton-audio boton-audio--pause">⏸️ Pausar</button>
@@ -342,7 +384,6 @@
 
             <!-- EXAMEN 1: FIRST TERM EXAMEN - Solo test -->
             <section id="unit-EXAM1" class="seccion-unidad seccion-unidad--oculta">
-                <h2 class="titulo-user">FIRST TERM EXAMEN</h2>
                 <div class="tarjeta-actividad">
                     <h2 class="tarjeta-actividad__subtitulo">FIRST TERM EXAMEN</h2>
                     <p class="tarjeta-actividad__texto">Examen del primer término - Unidades 1-3</p>
@@ -359,7 +400,6 @@
 
             <!-- EXAMEN 2: SECOND TERM EXAMEN - Solo test -->
             <section id="unit-EXAM2" class="seccion-unidad seccion-unidad--oculta">
-                <h2 class="titulo-user">SECOND TERM EXAMEN</h2>
                 <div class="tarjeta-actividad">
                     <h2 class="tarjeta-actividad__subtitulo">SECOND TERM EXAMEN</h2>
                     <p class="tarjeta-actividad__texto">Examen del segundo término - Unidades 4-6</p>
@@ -373,26 +413,12 @@
                     </div>
                 </div>
             </section>
-            
-            <section id="grades-section" class="seccion-unidad seccion-unidad--oculta">
-                <h2 class="titulo-user">CALIFICACIONES</h2>
-                <div class="tarjeta-leccion">
-                    <h2 class="tarjeta-leccion__titulo">Calificaciones por Unidad</h2>
-                    <table class="tabla-calificaciones">
-                        <thead>
-                            <tr>
-                                <th>Unidad</th>
-                                <th>Puntaje más alto</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="grades-table-body"></tbody>
-                    </table>
-                </div>
-            </section>
+
+
+
+
 
             <section id="unit-WRITING" class="seccion-unidad seccion-unidad--oculta">
-                <h2 class="titulo-user">PRACTICA DE ESCRITURA CON IA</h2>
                 <div class="tarjeta-leccion">
                     <h2 class="tarjeta-leccion__titulo">Práctica de Escritura</h2>
                     <p class="tarjeta-leccion__texto">Escribe una oración en inglés y la IA de Gemini la corregirá por
@@ -413,6 +439,9 @@
                     </div>
                 </div>
             </section>
+
+
+
 
         </main>
     </div>
