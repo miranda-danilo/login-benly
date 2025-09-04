@@ -5,6 +5,7 @@ import { showMessage } from "./notificaciones.js";
 import { handleWritingCorrection, loadWritingProgress } from "./writing.js";
 import { setupListeningExercise } from "./listening.js";
 import { setupReadingExercise } from "./reading.js";
+import { setupSpeakingExercise } from "./speaking.js"; // <-- AGREGAR ESTA LÍNEA
 
 // --- Datos de Unidades y Quizzes ---
 const units = [
@@ -17,6 +18,7 @@ const units = [
     { id: 'WRITING', title: 'Práctica de Escritura', quiz: 'none' },
     { id: 'LISTENING', title: 'Práctica de Escucha', quiz: 'listening' },
     { id: 'READING', title: 'Práctica de Lectura', quiz: 'reading' },
+     { id: 'SPEAKING', title: 'Práctica de Habla', quiz: 'speaking' }, 
     { id: 'EXAM1', title: 'FIRST TERM EXAMEN', quiz: 'true_false' },
     { id: 'EXAM2', title: 'SECOND TERM EXAMEN', quiz: 'true_false' },
 ];
@@ -543,7 +545,12 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
             setupListeningExercise(unitSection, playSound, userScores); // Llama a la nueva función y le pasa los puntajes
         } else if (unitId === 'READING') {
             setupReadingExercise(unitSection, playSound, userScores);
-        } else {
+        } else if (unitId === 'SPEAKING') { // <-- AGREGAR ESTA LÓGICA
+            setupSpeakingExercise(unitSection, playSound, userScores);
+        } 
+        
+        
+        else {
             // Elimina quiz anterior si existe y crea uno nuevo para unidades no-WRITING
             const oldQuiz = unitSection.querySelector('.tarjeta-actividad');
             if (oldQuiz) oldQuiz.remove();
@@ -724,7 +731,7 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
         });
 
         // Agrega las demás opciones de menú
-        const otherUnits = units.filter(unit => unit.id === 'WRITING' || unit.id === 'LISTENING' || unit.id === 'READING' || unit.id.startsWith('EXAM'));
+  const otherUnits = units.filter(unit => unit.id === 'WRITING' || unit.id === 'LISTENING' || unit.id === 'READING' || unit.id === 'SPEAKING' || unit.id.startsWith('EXAM')); // <-- AGREGAR SPEAKING AQUÍ
         otherUnits.forEach(unit => {
             const li = document.createElement('li');
             li.innerHTML = `<a href="#" data-section-id="unit-${unit.id}" class="unidad-link">
@@ -820,6 +827,7 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
             { id: 'WRITING', title: 'Práctica de Escritura', sectionId: 'unit-WRITING' },
             { id: 'LISTENING', title: 'Práctica de Escucha', sectionId: 'unit-LISTENING' },
             { id: 'READING', title: 'Práctica de Lectura', sectionId: 'unit-READING' },
+             { id: 'SPEAKING', title: 'Práctica de Habla', sectionId: 'unit-SPEAKING' },
             { id: 'EXAM1', title: 'EXAMEN FINAL 1', sectionId: 'unit-EXAM1' },
             { id: 'EXAM2', title: 'SECOND TERM EXAMEN', sectionId: 'unit-EXAM2' },
             { id: 'grades', title: 'Calificaciones', sectionId: 'grades-section' }
