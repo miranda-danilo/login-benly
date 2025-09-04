@@ -1,10 +1,11 @@
+// user_interface.js
+
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 import { auth, db } from "./conexion_firebase.js";
 import { showMessage } from "./notificaciones.js";
 import { handleWritingCorrection, loadWritingProgress } from "./writing.js";
 import { setupListeningExercise } from "./listening.js";
-import { setupReadingExercise } from "./reading.js";
 
 // --- Datos de Unidades y Quizzes ---
 const units = [
@@ -16,7 +17,6 @@ const units = [
     { id: 'UT6', title: 'Around Town - Free Time', quiz: 'true_false' },
     { id: 'WRITING', title: 'Práctica de Escritura', quiz: 'none' },
     { id: 'LISTENING', title: 'Práctica de Escucha', quiz: 'listening' },
-    { id: 'READING', title: 'Práctica de Lectura', quiz: 'reading' },
     { id: 'EXAM1', title: 'FIRST TERM EXAMEN', quiz: 'true_false' },
     { id: 'EXAM2', title: 'SECOND TERM EXAMEN', quiz: 'true_false' },
 ];
@@ -335,55 +335,6 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
         }
     };
 
-    /**
-     * Carga el progreso de la unidad WRITING desde Firestore.
-     * @param {string} userId - ID del usuario.
-     * @returns {Promise<{correctCount: number, score: number}>} - El progreso de escritura.
-     */
-    async function loadWritingProgress(userId) {
-        try {
-            const docRef = doc(db, `usuarios/${userId}`);
-            const docSnap = await getDoc(docRef);
-            const userScoresData = (docSnap.exists() && docSnap.data().scores) ? docSnap.data().scores : {};
-            const writing = userScoresData["WRITING"];
-            return {
-                correctCount: writing && writing.score ? Math.floor(writing.score / 2) : 0,
-                score: writing && writing.score ? writing.score : 0
-            };
-        } catch (e) {
-            console.error("Error loading writing progress:", e);
-            return { correctCount: 0, score: 0 };
-        }
-    }
-
-    /**
-     * Guarda el puntaje de la unidad WRITING en Firestore, solo si es mayor al previo.
-     * @param {string} userId - ID del usuario.
-     * @param {number} score - Puntaje de escritura.
-     */
-    async function saveWritingScore(userId, score) {
-        try {
-            const docRef = doc(db, `usuarios/${userId}`);
-            const docSnap = await getDoc(docRef);
-            const currentData = docSnap.exists() ? docSnap.data() : {};
-            const currentScores = currentData.scores || {};
-            const prevScore = currentScores["WRITING"]?.score || 0;
-            if (score > prevScore) {
-                const newScores = {
-                    ...currentScores,
-                    ["WRITING"]: {
-                        score: score,
-                        completada: score >= 10
-                    }
-                };
-                await setDoc(docRef, { ...currentData, scores: newScores }, { merge: true });
-                showMessage("¡Puntaje WRITING guardado!", "success");
-            }
-        } catch (error) {
-            console.error("Error al guardar WRITING:", error);
-            showMessage("Error al guardar WRITING.", "error");
-        }
-    }
 
     /**
      * Configura el quiz interactivo de Verdadero/Falso para una unidad.
@@ -541,8 +492,6 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
             }
         } else if (unitId === 'LISTENING') {
             setupListeningExercise(unitSection, playSound, userScores); // Llama a la nueva función y le pasa los puntajes
-        } else if (unitId === 'READING') {
-            setupReadingExercise(unitSection, playSound, userScores);
         } else {
             // Elimina quiz anterior si existe y crea uno nuevo para unidades no-WRITING
             const oldQuiz = unitSection.querySelector('.tarjeta-actividad');
@@ -724,7 +673,7 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
         });
 
         // Agrega las demás opciones de menú
-        const otherUnits = units.filter(unit => unit.id === 'WRITING' || unit.id === 'LISTENING' || unit.id === 'READING' || unit.id.startsWith('EXAM'));
+        const otherUnits = units.filter(unit => unit.id === 'WRITING' || unit.id === 'LISTENING' || unit.id.startsWith('EXAM'));
         otherUnits.forEach(unit => {
             const li = document.createElement('li');
             li.innerHTML = `<a href="#" data-section-id="unit-${unit.id}" class="unidad-link">
@@ -819,7 +768,6 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
             { id: 'modules', title: 'Módulos', sectionId: 'modules-section' },
             { id: 'WRITING', title: 'Práctica de Escritura', sectionId: 'unit-WRITING' },
             { id: 'LISTENING', title: 'Práctica de Escucha', sectionId: 'unit-LISTENING' },
-            { id: 'READING', title: 'Práctica de Lectura', sectionId: 'unit-READING' },
             { id: 'EXAM1', title: 'EXAMEN FINAL 1', sectionId: 'unit-EXAM1' },
             { id: 'EXAM2', title: 'SECOND TERM EXAMEN', sectionId: 'unit-EXAM2' },
             { id: 'grades', title: 'Calificaciones', sectionId: 'grades-section' }
