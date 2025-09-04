@@ -115,7 +115,17 @@ export const setupListeningExercise = (unitSection, playSound, userScores) => {
     const displayInitialScore = () => {
         const topicScore = userScores.scores?.LISTENING;
         const score = topicScore ? topicScore.score : 0;
-        scoreDisplay.innerHTML = `<h3 class="font-bold text-lg">Tu puntaje: ${score.toFixed(1)}/10</h3>`;
+      /*   scoreDisplay.innerHTML = `<b style="color:#2563eb;>Tu puntaje mayor es de:</b> ${score.toFixed(1)}/10 ${score.toFixed(10) >= 10  ? '<br><span style="color:green;font-weight:bold;">¡Felicidades, has completado la sección de listening!</span>' : ''}` */
+
+        scoreDisplay.innerHTML = `
+                <b style="color:#2563eb;">Tu puntaje mayor es de:</b> ${score.toFixed(1)}/10
+                ${score.toFixed(1) >= 10 ? '<br><span style="color:green;font-weight:bold;">¡Felicidades, has completado la sección de listening!</span>' : ''}
+            `
+
+/* `
+                <b style="color:#2563eb;">Tu puntaje mayor es de:</b> ${highestScore}/10 ${highestScore >= 10 ? '<br><span style="color:green;font-weight:bold;">¡Felicidades, has completado la sección de escritura!</span>' : ''}
+            ` */
+
     };
     displayInitialScore();
 

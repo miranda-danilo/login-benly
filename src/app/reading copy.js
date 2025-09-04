@@ -1,5 +1,3 @@
-// reading.js
-
 import { auth, db } from "./conexion_firebase.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 import { showMessage } from "./notificaciones.js";
@@ -125,7 +123,7 @@ function generateCrosswordHtml(placedWords) {
         for (let c = 0; c < gridCols; c++) {
             const letter = grid[r][c];
             const cellClass = letter ? "filled" : "empty";
-
+            
             let cellStyle = '';
             let isStartCell = false;
             let startColor = '';
@@ -147,7 +145,7 @@ function generateCrosswordHtml(placedWords) {
                 }
                 return false;
             });
-
+            
             if (letter) {
                 cellStyle = `style="background-color: ${wordData.color};"`;
             }
@@ -187,9 +185,6 @@ export const setupReadingExercise = (unitSection, playSound, userScores) => {
             <button id="loadReadingBtn" class="boton-primario">Cargar Crucigrama</button>
         </div>
 
-
-                <div id="scoreDisplayReading" class="score-display"></div>
-
         <div id="reading-area" class="reading-area hidden">
             <h3 id="storyTitle" class="story-title"></h3>
             <div class="reading-card">
@@ -206,7 +201,6 @@ export const setupReadingExercise = (unitSection, playSound, userScores) => {
                 <button id="repeatCrosswordBtn" class="boton-quiz--repeat hidden">Repetir Crucigrama</button>
             </div>
             <div id="reading-score-display" class="mt-4 text-center font-bold text-lg"></div>
-            <div id="highest-score-display" class="mt-2 text-center text-sm"></div>
         </div>
     `;
 
@@ -220,30 +214,10 @@ export const setupReadingExercise = (unitSection, playSound, userScores) => {
     const crosswordGridEl = document.getElementById('crosswordGrid');
     const checkCrosswordBtn = document.getElementById('checkCrosswordBtn');
     const repeatCrosswordBtn = document.getElementById('repeatCrosswordBtn');
-    const readingScoreDisplayEl = document.getElementById('reading-score-display');
-    const highestScoreDisplayEl = document.getElementById('highest-score-display');
-    const scoreDisplayReading = document.getElementById('scoreDisplayReading');
-
+    const scoreDisplayEl = document.getElementById('reading-score-display');
+    
     let currentLayout = null;
     let originalColors = {};
-
-    // Carga inicial del puntaje de lectura si existe
-    const displayInitialScore = async () => {
-        const user = auth.currentUser;
-        if (user) {
-            const scoreData = await getReadingScore(user.uid);
-            if (scoreData) {
-                scoreDisplayReading.innerHTML = `
-                    <b style="color:#2563eb;">Tu puntaje mayor es de:</b> ${scoreData.score.toFixed(1)}/10
-                    ${scoreData.score >= 10 ? '<br><span style="color:green;font-weight:bold;">¡Felicidades, has completado la sección de lectura!</span>' : ''}
-                `;
-            } else {
-                scoreDisplayReading.innerHTML = '';
-            }
-        }
-    };
-
-    displayInitialScore();
 
     // Manejador del botón de cargar historia
     loadReadingBtn.addEventListener('click', async () => {
@@ -252,13 +226,13 @@ export const setupReadingExercise = (unitSection, playSound, userScores) => {
             showMessage("Por favor, selecciona una historia.", "warning");
             return;
         }
-
+        
         try {
             const data = readingData[selectedTopic];
             if (data) {
                 readingArea.classList.remove('hidden');
                 storyTitleEl.textContent = data.title;
-
+                
                 currentLayout = data.placedWords;
 
                 // Genera el crucigrama y el texto con palabras resaltadas
@@ -269,25 +243,32 @@ export const setupReadingExercise = (unitSection, playSound, userScores) => {
                 document.querySelectorAll('.crossword-cell.filled').forEach(cell => {
                     originalColors[cell.dataset.row + '-' + cell.dataset.col] = cell.style.backgroundColor;
                 });
-
+                
                 // Muestra los botones
                 checkCrosswordBtn.classList.remove('hidden');
                 repeatCrosswordBtn.classList.add('hidden');
-
-                // Limpia el puntaje del intento anterior
-                readingScoreDisplayEl.innerHTML = '';
+                
+                // Obtiene el puntaje y lo muestra si existe
+                const user = auth.currentUser;
+                if (user) {
+                    const scoreData = await getReadingScore(user.uid);
+                    if (scoreData) {
+                        scoreDisplayEl.innerHTML = `Tu último puntaje: ${scoreData.score.toFixed(1)}/10`;
+                    } else {
+                        scoreDisplayEl.innerHTML = '';
+                    }
+                }
 
                 document.querySelectorAll('.crossword-input').forEach(input => {
                     input.disabled = false;
-                    input.value = '';
-
+                    
                     // Manejador del evento de entrada (input)
                     input.addEventListener('input', (e) => {
                         const cell = e.target.parentElement;
                         const row = parseInt(cell.dataset.row);
                         const col = parseInt(cell.dataset.col);
                         const userLetter = e.target.value.toUpperCase();
-
+                        
                         let correctLetter = '';
                         const placedWord = readingData[selectedTopic].placedWords.find(w => {
                             const word = w.word.toUpperCase();
@@ -302,7 +283,7 @@ export const setupReadingExercise = (unitSection, playSound, userScores) => {
                             const index = placedWord.orientation === 'horizontal' ? col - placedWord.startCol : row - placedWord.startRow;
                             correctLetter = placedWord.word.toUpperCase().charAt(index);
                         }
-
+                        
                         if (userLetter === correctLetter) {
                             cell.style.backgroundColor = 'var(--correct-color)';
                             cell.classList.remove('incorrect');
@@ -332,7 +313,7 @@ export const setupReadingExercise = (unitSection, playSound, userScores) => {
                         if (e.key === 'Backspace') {
                             const inputs = Array.from(document.querySelectorAll('.crossword-input'));
                             const currentIndex = inputs.indexOf(e.target);
-
+                            
                             if (e.target.value.length === 0) {
                                 e.preventDefault();
                                 if (currentIndex > 0) {
@@ -352,49 +333,47 @@ export const setupReadingExercise = (unitSection, playSound, userScores) => {
     });
 
     // Manejador del botón de verificar crucigrama
-    checkCrosswordBtn.addEventListener('click', async () => {
+    checkCrosswordBtn.addEventListener('click', () => {
         let correctWords = 0;
         const totalWords = currentLayout.length;
-
+        
         currentLayout.forEach(wordData => {
             let isWordCorrect = true;
             const word = wordData.word.toUpperCase();
-
+            
             for (let i = 0; i < word.length; i++) {
                 const r = wordData.orientation === 'horizontal' ? wordData.startRow : wordData.startRow + i;
                 const c = wordData.orientation === 'horizontal' ? wordData.startCol + i : wordData.startCol;
-
+                
                 const input = document.querySelector(`.crossword-input[data-row="${r}"][data-col="${c}"]`);
                 if (!input || input.value.toUpperCase() !== word.charAt(i)) {
                     isWordCorrect = false;
                     break;
                 }
             }
+
             if (isWordCorrect) {
                 correctWords++;
             }
         });
 
         const score = (correctWords / totalWords) * 10;
-
-        // Muestra el puntaje del intento actual
-        readingScoreDisplayEl.innerHTML = `Puntaje de este intento: ${score.toFixed(1)}/10`;
+        
+        scoreDisplayEl.innerHTML = `Tu puntaje: ${score.toFixed(1)}/10`;
 
         const user = auth.currentUser;
         if (user) {
-            await saveReadingScore(user.uid, score);
-            // Vuelve a cargar y mostrar el puntaje más alto después de guardar
-            displayInitialScore();
+            saveReadingScore(user.uid, score);
         }
 
-        if (score >= 7) {
+        if (score >= 7) { 
             playSound("win");
             showMessage("¡Excelente! Has completado el crucigrama con éxito.", "success");
         } else {
             playSound("fail");
             showMessage("Sigue practicando, puedes intentarlo de nuevo.", "warning");
         }
-
+        
         document.querySelectorAll('.crossword-input').forEach(input => input.disabled = true);
         checkCrosswordBtn.classList.add('hidden');
         repeatCrosswordBtn.classList.remove('hidden');
@@ -404,12 +383,21 @@ export const setupReadingExercise = (unitSection, playSound, userScores) => {
     repeatCrosswordBtn.addEventListener('click', () => {
         readingArea.classList.add('hidden');
         topicSelect.value = '';
-        readingScoreDisplayEl.innerHTML = '';
+        scoreDisplayEl.innerHTML = '';
         checkCrosswordBtn.classList.remove('hidden');
         repeatCrosswordBtn.classList.add('hidden');
     });
-};
 
+    // Carga inicial del puntaje de lectura
+    const user = auth.currentUser;
+    if (user) {
+        getReadingScore(user.uid).then(scoreData => {
+            if (scoreData) {
+                scoreDisplayEl.innerHTML = `Tu último puntaje: ${scoreData.score.toFixed(1)}/10`;
+            }
+        });
+    }
+};
 
 /**
  * Guarda el puntaje del ejercicio de lectura en Firestore.
@@ -430,20 +418,20 @@ async function saveReadingScore(userId, score) {
         const prevScore = currentScores['READING']?.score || 0;
 
         if (score > prevScore) {
-            const newScoreEntry = {
-                score: score,
-                completada: score >= 7,
-            };
+             const newScoreEntry = {
+                 score: score,
+                 completada: score >= 7,
+             };
+            
+             await setDoc(docRef, {
+                 ...currentData,
+                 scores: {
+                     ...currentScores,
+                     ['READING']: newScoreEntry
+                 }
+             }, { merge: true });
 
-            await setDoc(docRef, {
-                ...currentData,
-                scores: {
-                    ...currentScores,
-                    ['READING']: newScoreEntry
-                }
-            }, { merge: true });
-
-            showMessage("Puntaje de lectura guardado con éxito.", "success");
+             showMessage("Puntaje de lectura guardado con éxito.", "success");
         }
     } catch (error) {
         console.error("Error al guardar el puntaje de lectura:", error);

@@ -15,10 +15,10 @@ const units = [
     { id: 'UT4', title: 'Foods and Drinks', quiz: 'true_false' },
     { id: 'UT5', title: 'Things I Have', quiz: 'true_false' },
     { id: 'UT6', title: 'Around Town - Free Time', quiz: 'true_false' },
-    { id: 'WRITING', title: 'WRITING PRACTICE', quiz: 'none' },
-    { id: 'LISTENING', title: 'LISTENING PRACTICE', quiz: 'listening' },
-    { id: 'READING', title: 'READING PRACTICE', quiz: 'reading' },
-    { id: 'SPEAKING', title: 'SPEAKING PRACTICE', quiz: 'speaking' },
+    { id: 'WRITING', title: 'Práctica de Escritura', quiz: 'none' },
+    { id: 'LISTENING', title: 'Práctica de Escucha', quiz: 'listening' },
+    { id: 'READING', title: 'Práctica de Lectura', quiz: 'reading' },
+     { id: 'SPEAKING', title: 'Práctica de Habla', quiz: 'speaking' },
     { id: 'EXAM1', title: 'FIRST TERM EXAMEN', quiz: 'true_false' },
     { id: 'EXAM2', title: 'SECOND TERM EXAMEN', quiz: 'true_false' },
 ];
@@ -520,45 +520,46 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
 
         // Lógica específica para la unidad WRITING
         if (unitId === 'WRITING') {
+           
+
 
             let writingProgressDiv = document.getElementById("writingProgressDiv");
             if (!writingProgressDiv && feedbackContainer) {
                 writingProgressDiv = document.createElement("div");
                 writingProgressDiv.id = "writingProgressDiv";
                 writingProgressDiv.style.margin = "1.2rem 0";
-                writingProgressDiv.classList.add("score-display");
                 feedbackContainer.parentNode.insertBefore(writingProgressDiv, feedbackContainer);
             }
-
+            
             const user = auth.currentUser;
-            // La función loadWritingProgress ya no devuelve 'correctCount'
-            const { score } = user ? await loadWritingProgress(user.uid) : { score: 0 };
+            const { correctCount, score } = user ? await loadWritingProgress(user.uid) : { correctCount: 0, score: 0 };
 
             if (writingProgressDiv) {
                 writingProgressDiv.innerHTML = `
-            <b style="color:#2563eb;">Tu puntaje mayor es de:</b> ${score}/10
-            ${score >= 10 ? '<br><span style="color:green;font-weight:bold;">¡Felicidades, has completado la sección de escritura!</span>' : ''}
-        `;
+                    <b style="color:#2563eb;">Oraciones correctas:</b> ${correctCount}/5<br>
+                    <b style="color:#2563eb;">Puntaje:</b> ${score}/10
+                    ${correctCount >= 5 ? '<br><span style="color:green;font-weight:bold;">¡Completaste la sección de escritura!</span>' : ''}
+                `;
             }
         } else if (unitId === 'LISTENING') {
             setupListeningExercise(unitSection, playSound, userScores); // Llama a la nueva función y le pasa los puntajes
         } else if (unitId === 'READING') {
             setupReadingExercise(unitSection, playSound, userScores);
         } else if (unitId === 'SPEAKING') { // <-- AGREGAR ESTA LÓGICA
-
+            
             const user = auth.currentUser;
-            if (user) {
-                const docRef = doc(db, `usuarios/${user.uid}`);
-                const docSnap = await getDoc(docRef);
-                userScores = {
-                    scores: docSnap.exists() ? docSnap.data().scores : {},
-                };
+            if(user){
+              const docRef = doc(db, `usuarios/${user.uid}`);
+              const docSnap = await getDoc(docRef);
+              userScores = {
+                  scores: docSnap.exists() ? docSnap.data().scores : {},
+              };
             }
 
             setupSpeakingExercise(unitSection, playSound, userScores);
-        }
-
-
+        } 
+        
+        
         else {
             // Elimina quiz anterior si existe y crea uno nuevo para unidades no-WRITING
             const oldQuiz = unitSection.querySelector('.tarjeta-actividad');
@@ -588,111 +589,111 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
         }
 
         // Configuración de audio dinámico para todas las unidades
-        setTimeout(() => {
-            const playBtn = document.getElementById(`audio-play-${unitId.toLowerCase()}`);
-            const pauseBtn = document.getElementById(`audio-pause-${unitId.toLowerCase()}`);
-            const stopBtn = document.getElementById(`audio-stop-${unitId.toLowerCase()}`);
-            let utterance;
-            let isPaused = false;
-            let isSpeaking = false;
+       setTimeout(() => {
+                const playBtn = document.getElementById(`audio-play-${unitId.toLowerCase()}`);
+                const pauseBtn = document.getElementById(`audio-pause-${unitId.toLowerCase()}`);
+                const stopBtn = document.getElementById(`audio-stop-${unitId.toLowerCase()}`);
+                let utterance;
+                let isPaused = false;
+                let isSpeaking = false;
 
-            if (playBtn) {
-                playBtn.onclick = () => {
-                    window.speechSynthesis.cancel();
-                    isPaused = false;
-                    isSpeaking = true;
+                if (playBtn) {
+                    playBtn.onclick = () => {
+                        window.speechSynthesis.cancel();
+                        isPaused = false;
+                        isSpeaking = true;
 
-                    playBtn.classList.add('boton-audio--playing');
-                    playBtn.innerHTML = '🔊 Reproduciendo...';
+                        playBtn.classList.add('boton-audio--playing');
+                        playBtn.innerHTML = '🔊 Reproduciendo...';
+                        pauseBtn.classList.add('boton-audio--pause');
+                        pauseBtn.classList.remove('boton-audio--resume');
+                        pauseBtn.innerHTML = '⏸️ Pausar';
+                        stopBtn.classList.add('boton-audio--stop');
+
+                        // Solo lee el texto en inglés, ignorando lo que está dentro de <span>
+                        const unitSection = document.getElementById(`unit-${unitId}`);
+                        if (!unitSection) return;
+
+                        const leccionUl = unitSection.querySelector('.tarjeta-leccion ul');
+                        const vocabularioUl = unitSection.querySelector('.tarjeta-vocabulario ul');
+                        let texto = '';
+
+                        function getEnglishFromList(ul) {
+                            if (!ul) return '';
+                            return Array.from(ul.querySelectorAll('li'))
+                                .map(li => {
+                                    const span = li.querySelector('span');
+                                    if (span) {
+                                        return li.innerText.replace(span.innerText, '').trim();
+                                    }
+                                    if (li.innerText.includes(':')) {
+                                        return li.innerText.split(':')[0].trim();
+                                    }
+                                    return li.innerText.trim();
+                                })
+                                .filter(txt => txt.length > 0)
+                                .join('. ') + '. ';
+                        }
+
+                        texto += getEnglishFromList(leccionUl);
+                        texto += getEnglishFromList(vocabularioUl);
+
+                        utterance = new SpeechSynthesisUtterance(texto);
+                        utterance.lang = 'en-US';
+
+                        utterance.onend = () => {
+                            isSpeaking = false;
+                            playBtn.classList.remove('boton-audio--playing');
+                            playBtn.innerHTML = '▶️ Reproducir';
+                            pauseBtn.classList.add('boton-audio--pause');
+                            pauseBtn.classList.remove('boton-audio--resume');
+                            pauseBtn.innerHTML = '⏸️ Pausar';
+                        };
+                        utterance.onpause = () => {
+                            isPaused = true;
+                            pauseBtn.classList.remove('boton-audio--pause');
+                            pauseBtn.classList.add('boton-audio--resume');
+                            pauseBtn.innerHTML = '▶️ Reanudar';
+                        };
+                        utterance.onresume = () => {
+                            isPaused = false;
+                            pauseBtn.classList.add('boton-audio--pause');
+                            pauseBtn.classList.remove('boton-audio--resume');
+                            pauseBtn.innerHTML = '⏸️ Pausar';
+                        };
+
+                        window.speechSynthesis.speak(utterance);
+                    };
+                }
+                if (pauseBtn) {
+                    pauseBtn.onclick = () => {
+                        if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+                            window.speechSynthesis.pause();
+                        } else if (window.speechSynthesis.paused && isPaused) {
+                            window.speechSynthesis.resume();
+                        }
+                    };
                     pauseBtn.classList.add('boton-audio--pause');
                     pauseBtn.classList.remove('boton-audio--resume');
                     pauseBtn.innerHTML = '⏸️ Pausar';
+                }
+                if (stopBtn) {
+                    stopBtn.onclick = () => {
+                        window.speechSynthesis.cancel();
+                        if (playBtn) {
+                            playBtn.classList.remove('boton-audio--playing');
+                            playBtn.innerHTML = '▶️ Reproducir';
+                        }
+                        if (pauseBtn) {
+                            pauseBtn.classList.add('boton-audio--pause');
+                            pauseBtn.classList.remove('boton-audio--resume');
+                            pauseBtn.innerHTML = '⏸️ Pausar';
+                        }
+                    };
                     stopBtn.classList.add('boton-audio--stop');
-
-                    // Solo lee el texto en inglés, ignorando lo que está dentro de <span>
-                    const unitSection = document.getElementById(`unit-${unitId}`);
-                    if (!unitSection) return;
-
-                    const leccionUl = unitSection.querySelector('.tarjeta-leccion ul');
-                    const vocabularioUl = unitSection.querySelector('.tarjeta-vocabulario ul');
-                    let texto = '';
-
-                    function getEnglishFromList(ul) {
-                        if (!ul) return '';
-                        return Array.from(ul.querySelectorAll('li'))
-                            .map(li => {
-                                const span = li.querySelector('span');
-                                if (span) {
-                                    return li.innerText.replace(span.innerText, '').trim();
-                                }
-                                if (li.innerText.includes(':')) {
-                                    return li.innerText.split(':')[0].trim();
-                                }
-                                return li.innerText.trim();
-                            })
-                            .filter(txt => txt.length > 0)
-                            .join('. ') + '. ';
-                    }
-
-                    texto += getEnglishFromList(leccionUl);
-                    texto += getEnglishFromList(vocabularioUl);
-
-                    utterance = new SpeechSynthesisUtterance(texto);
-                    utterance.lang = 'en-US';
-
-                    utterance.onend = () => {
-                        isSpeaking = false;
-                        playBtn.classList.remove('boton-audio--playing');
-                        playBtn.innerHTML = '▶️ Reproducir';
-                        pauseBtn.classList.add('boton-audio--pause');
-                        pauseBtn.classList.remove('boton-audio--resume');
-                        pauseBtn.innerHTML = '⏸️ Pausar';
-                    };
-                    utterance.onpause = () => {
-                        isPaused = true;
-                        pauseBtn.classList.remove('boton-audio--pause');
-                        pauseBtn.classList.add('boton-audio--resume');
-                        pauseBtn.innerHTML = '▶️ Reanudar';
-                    };
-                    utterance.onresume = () => {
-                        isPaused = false;
-                        pauseBtn.classList.add('boton-audio--pause');
-                        pauseBtn.classList.remove('boton-audio--resume');
-                        pauseBtn.innerHTML = '⏸️ Pausar';
-                    };
-
-                    window.speechSynthesis.speak(utterance);
-                };
-            }
-            if (pauseBtn) {
-                pauseBtn.onclick = () => {
-                    if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
-                        window.speechSynthesis.pause();
-                    } else if (window.speechSynthesis.paused && isPaused) {
-                        window.speechSynthesis.resume();
-                    }
-                };
-                pauseBtn.classList.add('boton-audio--pause');
-                pauseBtn.classList.remove('boton-audio--resume');
-                pauseBtn.innerHTML = '⏸️ Pausar';
-            }
-            if (stopBtn) {
-                stopBtn.onclick = () => {
-                    window.speechSynthesis.cancel();
-                    if (playBtn) {
-                        playBtn.classList.remove('boton-audio--playing');
-                        playBtn.innerHTML = '▶️ Reproducir';
-                    }
-                    if (pauseBtn) {
-                        pauseBtn.classList.add('boton-audio--pause');
-                        pauseBtn.classList.remove('boton-audio--resume');
-                        pauseBtn.innerHTML = '⏸️ Pausar';
-                    }
-                };
-                stopBtn.classList.add('boton-audio--stop');
-                stopBtn.innerHTML = '⏹️ Parar';
-            }
-        }, 0);
+                    stopBtn.innerHTML = '⏹️ Parar';
+                }
+            }, 0);
     };
 
     /**
@@ -732,7 +733,7 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
 
         // Renderiza el botón "Módulos"
         const modulesLi = document.createElement('li');
-        modulesLi.innerHTML = `<a href="#" data-section-id="modules-section" class="unidad-link">ENGLISH A1 - UNITS</a>`;
+        modulesLi.innerHTML = `<a href="#" data-section-id="modules-section" class="unidad-link">Módulos</a>`;
         unitList.appendChild(modulesLi);
         modulesLi.querySelector('a')?.addEventListener('click', (e) => {
             e.preventDefault();
@@ -740,13 +741,12 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
         });
 
         // Agrega las demás opciones de menú
-        const otherUnits = units.filter(unit => unit.id === 'WRITING' || unit.id === 'LISTENING' || unit.id === 'READING' || unit.id === 'SPEAKING' || unit.id.startsWith('EXAM')); // <-- AGREGAR SPEAKING AQUÍ
+  const otherUnits = units.filter(unit => unit.id === 'WRITING' || unit.id === 'LISTENING' || unit.id === 'READING' || unit.id === 'SPEAKING' || unit.id.startsWith('EXAM')); // <-- AGREGAR SPEAKING AQUÍ
         otherUnits.forEach(unit => {
             const li = document.createElement('li');
-            li.innerHTML = `<a href="#" data-section-id="unit-${unit.id}" class="unidad-link">${unit.title}</a>`;
-            /* li.innerHTML = `<a href="#" data-section-id="unit-${unit.id}" class="unidad-link">
+            li.innerHTML = `<a href="#" data-section-id="unit-${unit.id}" class="unidad-link">
                                 <span class="unidad-link__id">${unit.id}:</span> ${unit.title}
-                            </a>`; */
+                            </a>`;
             unitList.appendChild(li);
             li.querySelector('a')?.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -757,7 +757,7 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
         // Agrega opción de calificaciones al final del menú principal
         const gradesLi = document.createElement('li');
         gradesLi.innerHTML = `<a href="#" data-section-id="grades-section" class="unidad-link unidad-link--calificaciones" id="grades-tab">
-            <span class="unidad-link__id">GRADES</span>
+            <span class="unidad-link__id">Calificaciones</span>
         </a>`;
         unitList.appendChild(gradesLi);
 
@@ -833,69 +833,31 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
 
         MobileUnitList.innerHTML = '';
         const menuItems = [
-            { id: 'modules', title: 'ENGLISH A1 – UNITS', sectionId: 'modules-section' },
-            { id: 'WRITING', title: 'WRITING PRACTICE', sectionId: 'unit-WRITING' },
-            { id: 'LISTENING', title: 'LISTENING PRACTICE', sectionId: 'unit-LISTENING' },
-            { id: 'READING', title: 'READING PRACTICE', sectionId: 'unit-READING' },
-            { id: 'SPEAKING', title: 'SPEAKING PRACTICE', sectionId: 'unit-SPEAKING' },
-            { id: 'EXAM1', title: 'FIRST TERM EXAM', sectionId: 'unit-EXAM1' },
-            { id: 'EXAM2', title: 'SECOND TERM EXAM', sectionId: 'unit-EXAM2' },
-            { id: 'grades', title: 'GRADES', sectionId: 'grades-section' }
+            { id: 'modules', title: 'Módulos', sectionId: 'modules-section' },
+            { id: 'WRITING', title: 'Práctica de Escritura', sectionId: 'unit-WRITING' },
+            { id: 'LISTENING', title: 'Práctica de Escucha', sectionId: 'unit-LISTENING' },
+            { id: 'READING', title: 'Práctica de Lectura', sectionId: 'unit-READING' },
+             { id: 'SPEAKING', title: 'Práctica de Habla', sectionId: 'unit-SPEAKING' },
+            { id: 'EXAM1', title: 'EXAMEN FINAL 1', sectionId: 'unit-EXAM1' },
+            { id: 'EXAM2', title: 'SECOND TERM EXAMEN', sectionId: 'unit-EXAM2' },
+            { id: 'grades', title: 'Calificaciones', sectionId: 'grades-section' }
         ];
 
-
-        /*      menuItems.forEach(item => {
-         const li = document.createElement('li');
-         li.innerHTML = `<a href="#" data-section-id="${item.sectionId}" class="unidad-link">${item.title}</a>`;
-                 MobileUnitList.appendChild(li);
-         li.querySelector('a')?.addEventListener('click', (e) => {
-             e.preventDefault();
-             if (hamburgerMenu) hamburgerMenu.style.display = "none";
-             if (hamburgerBtn) hamburgerBtn.style.display = "flex";
-             if (item.id === 'modules') {
-                 renderModulesGrid();
-             } else if (item.id === 'grades') { // **NUEVO CAMBIO AQUÍ**
-                
-                 renderGradesSection(); // Llama a la función que renderiza la tabla de calificaciones
-             } else {
-                 renderUnitContent(item.id);
-             }
-         });
-     }); */
         menuItems.forEach(item => {
             const li = document.createElement('li');
-
-            // NUEVO CAMBIO: Agregamos el enlace
-            const link = document.createElement('a');
-            link.href = "#";
-            link.setAttribute("data-section-id", item.sectionId);
-            link.classList.add("unidad-link");
-            link.textContent = item.title;
-
-            // NUEVO CAMBIO: Agregamos la clase de estilo si es el botón de calificaciones
-            if (item.id === 'grades') {
-                link.classList.add('unidad-link--calificaciones'); // Agrega la clase CSS
-                link.innerHTML = `<span class="unidad-link__id">${item.title}</span>`;
-            }
-
-            li.appendChild(link);
+            li.innerHTML = `<a href="#" data-section-id="${item.sectionId}" class="unidad-link">${item.title}</a>`;
             MobileUnitList.appendChild(li);
-
-            link.addEventListener('click', (e) => {
+            li.querySelector('a')?.addEventListener('click', (e) => {
                 e.preventDefault();
                 if (hamburgerMenu) hamburgerMenu.style.display = "none";
                 if (hamburgerBtn) hamburgerBtn.style.display = "flex";
                 if (item.id === 'modules') {
                     renderModulesGrid();
-                } else if (item.id === 'grades') {
-                    renderGradesSection();
                 } else {
                     renderUnitContent(item.id);
                 }
             });
         });
-
-
 
         updateUnitCompletionStatus(MobileUnitList);
     }

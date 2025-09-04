@@ -32,7 +32,7 @@ async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
 /**
  * Carga el progreso de la unidad WRITING desde Firestore.
  * @param {string} userId - ID del usuario.
- * @returns {Promise<{score: number}>} - El puntaje de escritura.
+ * @returns {Promise<{correctCount: number, score: number}>} - El progreso de escritura.
  */
 export async function loadWritingProgress(userId) {
     try {
@@ -41,11 +41,12 @@ export async function loadWritingProgress(userId) {
         const userScoresData = (docSnap.exists() && docSnap.data().scores) ? docSnap.data().scores : {};
         const writing = userScoresData["WRITING"];
         return {
+            correctCount: writing && writing.score ? Math.floor(writing.score / 2) : 0,
             score: writing && writing.score ? writing.score : 0
         };
     } catch (e) {
         console.error("Error loading writing progress:", e);
-        return { score: 0 };
+        return { correctCount: 0, score: 0 };
     }
 }
 
@@ -73,7 +74,7 @@ async function saveWritingScore(userId, score) {
             showMessage("¡Puntaje WRITING guardado!", "success");
         }
     } catch (error) {
-        console.gerror("Error al guardar WRITING:", error);
+        console.error("Error al guardar WRITING:", error);
         showMessage("Error al guardar WRITING.", "error");
     }
 }
@@ -136,24 +137,23 @@ export const handleWritingCorrection = async (sentence, feedbackContainer, feedb
 
         let outputHtml = '';
         const user = auth.currentUser;
-        let currentScore = 0;
+        let writingProgress = user ? await loadWritingProgress(user.uid) : { correctCount: 0, score: 0 };
 
-        // Determina el puntaje del intento actual
         if (parsedResult.status === 'Correcta') {
             playSound("correct");
-            currentScore = 10;
-            if (user) await saveWritingScore(user.uid, currentScore);
+            writingProgress.correctCount = Math.min(writingProgress.correctCount + 1, 5);
+            writingProgress.score = Math.min(writingProgress.correctCount * 2, 10);
+
+            if (user) await saveWritingScore(user.uid, writingProgress.score);
 
             outputHtml = `
                 <p class="feedback-message feedback-message--correct">
                     <svg class="feedback-message__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     ¡Correcta!
                 </p>
-                <p class="feedback-explanation">Tu oración es gramaticalmente correcta. Has obtenido <b>${currentScore}</b> puntos.</p>
+                <p class="feedback-explanation">Tu oración es gramaticalmente correcta.</p>
             `;
         } else {
-            playSound("incorrect");
-            currentScore = 0;
             outputHtml = `
                 <p class="feedback-message feedback-message--incorrect">
                     <svg class="feedback-message__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -167,18 +167,14 @@ export const handleWritingCorrection = async (sentence, feedbackContainer, feedb
                     <h3 class="input-label">Explicación:</h3>
                     <p class="explanation-text">${parsedResult.explanation}</p>
                 </div>
-                <p class="feedback-score">Puntaje obtenido en este intento: <b>${currentScore}</b> puntos.</p>
             `;
         }
 
-        // Obtener el puntaje más alto para mostrarlo en pantalla
-        const userProgress = user ? await loadWritingProgress(user.uid) : { score: 0 };
-        const highestScore = userProgress.score;
-
         if (writingProgressDiv) {
             writingProgressDiv.innerHTML = `
-                <b style="color:#2563eb;">Tu puntaje mayor es de:</b> ${highestScore}/10
-                ${highestScore >= 10 ? '<br><span style="color:green;font-weight:bold;">¡Felicidades, has completado la sección de escritura!</span>' : ''}
+                <b style="color:#2563eb;">Oraciones correctas:</b> ${writingProgress.correctCount}/5<br>
+                <b style="color:#2563eb;">Puntaje:</b> ${writingProgress.score}/10
+                ${writingProgress.correctCount >= 5 ? '<br><span style="color:green;font-weight:bold;">¡Completaste la sección de escritura!</span>' : ''}
             `;
         }
 
