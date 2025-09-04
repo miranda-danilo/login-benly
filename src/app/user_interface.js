@@ -1,7 +1,11 @@
+// user_interface.js
+
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 import { auth, db } from "./conexion_firebase.js";
 import { showMessage } from "./notificaciones.js";
+import { handleWritingCorrection, loadWritingProgress } from "./writing.js";
+import { setupListeningExercise } from "./listening.js";
 
 // --- Datos de Unidades y Quizzes ---
 const units = [
@@ -12,6 +16,7 @@ const units = [
     { id: 'UT5', title: 'Things I Have', quiz: 'true_false' },
     { id: 'UT6', title: 'Around Town - Free Time', quiz: 'true_false' },
     { id: 'WRITING', title: 'Práctica de Escritura', quiz: 'none' },
+    { id: 'LISTENING', title: 'Práctica de Escucha', quiz: 'listening' },
     { id: 'EXAM1', title: 'FIRST TERM EXAMEN', quiz: 'true_false' },
     { id: 'EXAM2', title: 'SECOND TERM EXAMEN', quiz: 'true_false' },
 ];
@@ -105,7 +110,7 @@ const moduleInfo = [
     { id: 'UT3', title: 'UNIT 3', desc: 'Daily Life', icon: '⏰', img: 'https://images.pexels.com/photos/3771069/pexels-photo-3771069.jpeg' },
     { id: 'UT4', title: 'UNIT 4', desc: 'Food and Drinks', icon: '🍎', img: 'https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg' },
     { id: 'UT5', title: 'UNIT 5', desc: 'Things I Have', icon: '📱', img: 'https://images.pexels.com/photos/607812/pexels-photo-607812.jpegg' },
-    { id: 'UT6', title: 'UNIT 6', desc: 'Around the City', icon: '🏞️', img: 'https://img.freepik.com/psd-premium/renderizacion-3d-patio-recreo_23-2150659735.jpg' },
+    { id: 'UT6', title: 'UNIT6', desc: 'Around the City', icon: '🏞️', img: 'https://img.freepik.com/psd-premium/renderizacion-3d-patio-recreo_23-2150659735.jpg' },
 ];
 
 
@@ -236,13 +241,13 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
     const showSection = (sectionToShow) => {
         // Oculta todas las secciones
         unitSections.forEach(section => section.classList.add('seccion-unidad--oculta'));
-        
+
         // Muestra la sección correcta
         if (sectionToShow) {
             sectionToShow.classList.remove('seccion-unidad--oculta');
-        } 
-        
-         // Actualiza la clase activa en el menú
+        }
+
+        // Actualiza la clase activa en el menú
         document.querySelectorAll('.unidad-link').forEach(link => link.classList.remove('unidad-link--activo'));
         const activeLink = document.querySelector(`[data-section-id="${sectionToShow.id}"]`);
         if (activeLink) activeLink.classList.add('unidad-link--activo');
@@ -285,8 +290,13 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
         const links = container.querySelectorAll('.unidad-link');
         links.forEach(link => {
             const unitId = link.dataset.unitId;
-            const scoreData = userScores[unitId];
+            let isCompleted = false;
+            const scoreData = userScores.scores?.[unitId];
             if (scoreData && scoreData.completada) {
+                isCompleted = true;
+            }
+
+            if (isCompleted) {
                 link.classList.add('unidad-link--completada');
             } else {
                 link.classList.remove('unidad-link--completada');
@@ -483,7 +493,7 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
         }
 
         // Cargar estado previo del quiz si existe
-        const scoreData = userScores[unitId];
+        const scoreData = userScores.scores?.[unitId];
         if (scoreData) {
             questionEl.textContent = `Examen completado. Tu puntaje es: ${scoreData.score.toFixed(1)}/10`;
             feedbackEl.textContent = isExam ? 'EXAMEN REALIZADO.' : (scoreData.completada ? '¡Felicidades!' : 'Puedes mejorar tu puntaje.');
@@ -503,11 +513,14 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
     const renderUnitContent = async (unitId) => {
         showSection(document.getElementById(`unit-${unitId}`));
 
-          const unitSection = document.getElementById(`unit-${unitId}`);
+        const unitSection = document.getElementById(`unit-${unitId}`);
 
 
         // Lógica específica para la unidad WRITING
         if (unitId === 'WRITING') {
+           
+
+
             let writingProgressDiv = document.getElementById("writingProgressDiv");
             if (!writingProgressDiv && feedbackContainer) {
                 writingProgressDiv = document.createElement("div");
@@ -515,7 +528,7 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
                 writingProgressDiv.style.margin = "1.2rem 0";
                 feedbackContainer.parentNode.insertBefore(writingProgressDiv, feedbackContainer);
             }
-
+            
             const user = auth.currentUser;
             const { correctCount, score } = user ? await loadWritingProgress(user.uid) : { correctCount: 0, score: 0 };
 
@@ -526,8 +539,10 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
                     ${correctCount >= 5 ? '<br><span style="color:green;font-weight:bold;">¡Completaste la sección de escritura!</span>' : ''}
                 `;
             }
+        } else if (unitId === 'LISTENING') {
+            setupListeningExercise(unitSection, playSound, userScores); // Llama a la nueva función y le pasa los puntajes
         } else {
-             // Elimina quiz anterior si existe y crea uno nuevo para unidades no-WRITING
+            // Elimina quiz anterior si existe y crea uno nuevo para unidades no-WRITING
             const oldQuiz = unitSection.querySelector('.tarjeta-actividad');
             if (oldQuiz) oldQuiz.remove();
 
@@ -555,111 +570,111 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
         }
 
         // Configuración de audio dinámico para todas las unidades
-         setTimeout(() => {
-                const playBtn = document.getElementById(`audio-play-${unitId.toLowerCase()}`);
-                const pauseBtn = document.getElementById(`audio-pause-${unitId.toLowerCase()}`);
-                const stopBtn = document.getElementById(`audio-stop-${unitId.toLowerCase()}`);
-                let utterance;
-                let isPaused = false;
-                let isSpeaking = false;
+        setTimeout(() => {
+            const playBtn = document.getElementById(`audio-play-${unitId.toLowerCase()}`);
+            const pauseBtn = document.getElementById(`audio-pause-${unitId.toLowerCase()}`);
+            const stopBtn = document.getElementById(`audio-stop-${unitId.toLowerCase()}`);
+            let utterance;
+            let isPaused = false;
+            let isSpeaking = false;
 
-                if (playBtn) {
-                    playBtn.onclick = () => {
-                        window.speechSynthesis.cancel();
-                        isPaused = false;
-                        isSpeaking = true;
+            if (playBtn) {
+                playBtn.onclick = () => {
+                    window.speechSynthesis.cancel();
+                    isPaused = false;
+                    isSpeaking = true;
 
-                        playBtn.classList.add('boton-audio--playing');
-                        playBtn.innerHTML = '🔊 Reproduciendo...';
-                        pauseBtn.classList.add('boton-audio--pause');
-                        pauseBtn.classList.remove('boton-audio--resume');
-                        pauseBtn.innerHTML = '⏸️ Pausar';
-                        stopBtn.classList.add('boton-audio--stop');
-
-                        // Solo lee el texto en inglés, ignorando lo que está dentro de <span>
-                        const unitSection = document.getElementById(`unit-${unitId}`);
-                        if (!unitSection) return;
-
-                        const leccionUl = unitSection.querySelector('.tarjeta-leccion ul');
-                        const vocabularioUl = unitSection.querySelector('.tarjeta-vocabulario ul');
-                        let texto = '';
-
-                        function getEnglishFromList(ul) {
-                            if (!ul) return '';
-                            return Array.from(ul.querySelectorAll('li'))
-                                .map(li => {
-                                    const span = li.querySelector('span');
-                                    if (span) {
-                                        return li.innerText.replace(span.innerText, '').trim();
-                                    }
-                                    if (li.innerText.includes(':')) {
-                                        return li.innerText.split(':')[0].trim();
-                                    }
-                                    return li.innerText.trim();
-                                })
-                                .filter(txt => txt.length > 0)
-                                .join('. ') + '. ';
-                        }
-
-                        texto += getEnglishFromList(leccionUl);
-                        texto += getEnglishFromList(vocabularioUl);
-
-                        utterance = new SpeechSynthesisUtterance(texto);
-                        utterance.lang = 'en-US';
-
-                        utterance.onend = () => {
-                            isSpeaking = false;
-                            playBtn.classList.remove('boton-audio--playing');
-                            playBtn.innerHTML = '▶️ Reproducir';
-                            pauseBtn.classList.add('boton-audio--pause');
-                            pauseBtn.classList.remove('boton-audio--resume');
-                            pauseBtn.innerHTML = '⏸️ Pausar';
-                        };
-                        utterance.onpause = () => {
-                            isPaused = true;
-                            pauseBtn.classList.remove('boton-audio--pause');
-                            pauseBtn.classList.add('boton-audio--resume');
-                            pauseBtn.innerHTML = '▶️ Reanudar';
-                        };
-                        utterance.onresume = () => {
-                            isPaused = false;
-                            pauseBtn.classList.add('boton-audio--pause');
-                            pauseBtn.classList.remove('boton-audio--resume');
-                            pauseBtn.innerHTML = '⏸️ Pausar';
-                        };
-
-                        window.speechSynthesis.speak(utterance);
-                    };
-                }
-                if (pauseBtn) {
-                    pauseBtn.onclick = () => {
-                        if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
-                            window.speechSynthesis.pause();
-                        } else if (window.speechSynthesis.paused && isPaused) {
-                            window.speechSynthesis.resume();
-                        }
-                    };
+                    playBtn.classList.add('boton-audio--playing');
+                    playBtn.innerHTML = '🔊 Reproduciendo...';
                     pauseBtn.classList.add('boton-audio--pause');
                     pauseBtn.classList.remove('boton-audio--resume');
                     pauseBtn.innerHTML = '⏸️ Pausar';
-                }
-                if (stopBtn) {
-                    stopBtn.onclick = () => {
-                        window.speechSynthesis.cancel();
-                        if (playBtn) {
-                            playBtn.classList.remove('boton-audio--playing');
-                            playBtn.innerHTML = '▶️ Reproducir';
-                        }
-                        if (pauseBtn) {
-                            pauseBtn.classList.add('boton-audio--pause');
-                            pauseBtn.classList.remove('boton-audio--resume');
-                            pauseBtn.innerHTML = '⏸️ Pausar';
-                        }
-                    };
                     stopBtn.classList.add('boton-audio--stop');
-                    stopBtn.innerHTML = '⏹️ Parar';
-                }
-            }, 0);
+
+                    // Solo lee el texto en inglés, ignorando lo que está dentro de <span>
+                    const unitSection = document.getElementById(`unit-${unitId}`);
+                    if (!unitSection) return;
+
+                    const leccionUl = unitSection.querySelector('.tarjeta-leccion ul');
+                    const vocabularioUl = unitSection.querySelector('.tarjeta-vocabulario ul');
+                    let texto = '';
+
+                    function getEnglishFromList(ul) {
+                        if (!ul) return '';
+                        return Array.from(ul.querySelectorAll('li'))
+                            .map(li => {
+                                const span = li.querySelector('span');
+                                if (span) {
+                                    return li.innerText.replace(span.innerText, '').trim();
+                                }
+                                if (li.innerText.includes(':')) {
+                                    return li.innerText.split(':')[0].trim();
+                                }
+                                return li.innerText.trim();
+                            })
+                            .filter(txt => txt.length > 0)
+                            .join('. ') + '. ';
+                    }
+
+                    texto += getEnglishFromList(leccionUl);
+                    texto += getEnglishFromList(vocabularioUl);
+
+                    utterance = new SpeechSynthesis.Utterance(texto);
+                    utterance.lang = 'en-US';
+
+                    utterance.onend = () => {
+                        isSpeaking = false;
+                        playBtn.classList.remove('boton-audio--playing');
+                        playBtn.innerHTML = '▶️ Reproducir';
+                        pauseBtn.classList.add('boton-audio--pause');
+                        pauseBtn.classList.remove('boton-audio--resume');
+                        pauseBtn.innerHTML = '⏸️ Pausar';
+                    };
+                    utterance.onpause = () => {
+                        isPaused = true;
+                        pauseBtn.classList.remove('boton-audio--pause');
+                        pauseBtn.classList.add('boton-audio--resume');
+                        pauseBtn.innerHTML = '▶️ Reanudar';
+                    };
+                    utterance.onresume = () => {
+                        isPaused = false;
+                        pauseBtn.classList.add('boton-audio--pause');
+                        pauseBtn.classList.remove('boton-audio--resume');
+                        pauseBtn.innerHTML = '⏸️ Pausar';
+                    };
+
+                    window.speechSynthesis.speak(utterance);
+                };
+            }
+            if (pauseBtn) {
+                pauseBtn.onclick = () => {
+                    if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+                        window.speechSynthesis.pause();
+                    } else if (window.speechSynthesis.paused && isPaused) {
+                        window.speechSynthesis.resume();
+                    }
+                };
+                pauseBtn.classList.add('boton-audio--pause');
+                pauseBtn.classList.remove('boton-audio--resume');
+                pauseBtn.innerHTML = '⏸️ Pausar';
+            }
+            if (stopBtn) {
+                stopBtn.onclick = () => {
+                    window.speechSynthesis.cancel();
+                    if (playBtn) {
+                        playBtn.classList.remove('boton-audio--playing');
+                        playBtn.innerHTML = '▶️ Reproducir';
+                    }
+                    if (pauseBtn) {
+                        pauseBtn.classList.add('boton-audio--pause');
+                        pauseBtn.classList.remove('boton-audio--resume');
+                        pauseBtn.innerHTML = '⏸️ Pausar';
+                    }
+                };
+                stopBtn.classList.add('boton-audio--stop');
+                stopBtn.innerHTML = '⏹️ Parar';
+            }
+        }, 0);
     };
 
     /**
@@ -673,7 +688,7 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
         if (tbody) {
             tbody.innerHTML = "";
             units.forEach(unit => {
-                const scoreData = userScores[unit.id];
+                let scoreData = userScores.scores?.[unit.id];
                 const score = scoreData ? scoreData.score : "-";
                 const estado = scoreData && scoreData.completada ? "Completada" : "Pendiente";
                 const estadoClass = scoreData && scoreData.completada ? "estado-aprobado" : "estado-reprobado";
@@ -696,10 +711,10 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
         if (!unitList) return;
 
         unitList.innerHTML = '';
-        
+
         // Renderiza el botón "Módulos"
         const modulesLi = document.createElement('li');
-        modulesLi.innerHTML = `<a href="#" data-section-id="modules-section" class="unidad-link">MÓDULOS</a>`;
+        modulesLi.innerHTML = `<a href="#" data-section-id="modules-section" class="unidad-link">Módulos</a>`;
         unitList.appendChild(modulesLi);
         modulesLi.querySelector('a')?.addEventListener('click', (e) => {
             e.preventDefault();
@@ -707,9 +722,9 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
         });
 
         // Agrega las demás opciones de menú
-        const otherUnits = units.filter(unit => unit.id === 'WRITING' || unit.id.startsWith('EXAM'));
+        const otherUnits = units.filter(unit => unit.id === 'WRITING' || unit.id === 'LISTENING' || unit.id.startsWith('EXAM'));
         otherUnits.forEach(unit => {
-             const li = document.createElement('li');
+            const li = document.createElement('li');
             li.innerHTML = `<a href="#" data-section-id="unit-${unit.id}" class="unidad-link">
                                 <span class="unidad-link__id">${unit.id}:</span> ${unit.title}
                             </a>`;
@@ -738,7 +753,9 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
         // Escucha los cambios en los puntajes del usuario en Firestore
         const userRef = doc(db, `usuarios/${userId}`);
         onSnapshot(userRef, (docSnap) => {
-            userScores = docSnap.exists() && docSnap.data().scores ? docSnap.data().scores : {};
+            userScores = {
+                scores: docSnap.exists() ? docSnap.data().scores : {},
+            };
             updateUnitCompletionStatus(unitList);
             updateUnitCompletionStatus(MobileUnitList); // Actualiza también el menú móvil
         });
@@ -754,119 +771,17 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
                 showAlert('Por favor, escribe una oración para verificar.');
                 return;
             }
+            const writingProgressDiv = document.getElementById("writingProgressDiv");
 
-            showAlert(''); // Limpiar alertas previas
-            feedbackContainer?.classList.remove('hidden');
-            feedbackContent?.classList.add('hidden');
-            loadingIndicator?.classList.remove('hidden');
+            await handleWritingCorrection(
+                sentence,
+                feedbackContainer,
+                feedbackContent,
+                loadingIndicator,
+                writingProgressDiv,
+                playSound
+            );
 
-            try {
-                const prompt = `Actúa como un corrector de oraciones en inglés. Analiza la siguiente oración y determina si es gramaticalmente correcta. Si es correcta, devuelve un JSON con el estado "Correcta". Si es incorrecta, devuelve un JSON con el estado "Incorrecta", la versión corregida de la oración y una explicación clara y concisa de los errores en español.
-
-                Oración: "${sentence}"
-
-                Ejemplo de JSON correcto:
-                {
-                    "status": "Correcta"
-                }
-
-                Ejemplo de JSON incorrecto:
-                {
-                    "status": "Incorrecta",
-                    "corrected_sentence": "The man goes to the store.",
-                    "explanation": "El verbo 'go' debe estar en su forma 'goes' para concordar con el sujeto 'the man' en tercera persona del singular."
-                }`;
-
-                const payload = {
-                    contents: [{ role: "user", parts: [{ text: prompt }] }],
-                    generationConfig: {
-                        responseMimeType: "application/json",
-                        responseSchema: {
-                            type: "OBJECT",
-                            properties: {
-                                status: { type: "STRING" },
-                                corrected_sentence: { type: "STRING", description: "Only required if status is 'Incorrecta'" },
-                                explanation: { type: "STRING", description: "Only required if status is 'Incorrecta'" }
-                            },
-                            required: ["status"]
-                        }
-                    }
-                };
-
-                const apiKey = "";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-                const response = await fetchWithRetry(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = response.candidates[0].content.parts[0].text;
-                const parsedResult = JSON.parse(result);
-
-                let outputHtml = '';
-                let writingProgress = await loadWritingProgress(auth.currentUser.uid); // Cargar el progreso más reciente
-
-                if (parsedResult.status === 'Correcta') {
-                    playSound("correct");
-                    writingProgress.correctCount = Math.min(writingProgress.correctCount + 1, 5);
-                    writingProgress.score = Math.min(writingProgress.correctCount * 2, 10);
-
-                    if (auth.currentUser) await saveWritingScore(auth.currentUser.uid, writingProgress.score);
-
-                    outputHtml = `
-                        <p class="feedback-message feedback-message--correct">
-                            <svg class="feedback-message__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            ¡Correcta!
-                        </p>
-                        <p class="feedback-explanation">Tu oración es gramaticalmente correcta.</p>
-                    `;
-                } else {
-                    outputHtml = `
-                        <p class="feedback-message feedback-message--incorrect">
-                            <svg class="feedback-message__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            ¡Incorrecta!
-                        </p>
-                        <div class="corrected-section">
-                            <h3 class="input-label">Versión corregida:</h3>
-                            <p class="corrected-text">"${parsedResult.corrected_sentence}"</p>
-                        </div>
-                        <div class="explanation-section">
-                            <h3 class="input-label">Explicación:</h3>
-                            <p class="explanation-text">${parsedResult.explanation}</p>
-                        </div>
-                    `;
-                }
-
-                let writingProgressDiv = document.getElementById("writingProgressDiv");
-                if (!writingProgressDiv && feedbackContainer) {
-                    writingProgressDiv = document.createElement("div");
-                    writingProgressDiv.id = "writingProgressDiv";
-                    writingProgressDiv.style.margin = "1.2rem 0";
-                    feedbackContainer.parentNode.insertBefore(writingProgressDiv, feedbackContainer);
-                }
-                if (writingProgressDiv) {
-                    writingProgressDiv.innerHTML = `
-                        <b style="color:#2563eb;">Oraciones correctas:</b> ${writingProgress.correctCount}/5<br>
-                        <b style="color:#2563eb;">Puntaje:</b> ${writingProgress.score}/10
-                        ${writingProgress.correctCount >= 5 ? '<br><span style="color:green;font-weight:bold;">¡Completaste la sección de escritura!</span>' : ''}
-                    `;
-                }
-
-                if (feedbackContent) feedbackContent.innerHTML = outputHtml;
-            } catch (error) {
-                console.error("Error during writing correction:", error);
-                if (feedbackContent) {
-                    feedbackContent.innerHTML = `
-                        <p class="error-message">Ocurrió un error al procesar la solicitud. Por favor, inténtalo de nuevo.</p>
-                        <p class="error-detail">Detalles del error: ${error.message}</p>
-                    `;
-                }
-            } finally {
-                loadingIndicator?.classList.add('hidden');
-                feedbackContent?.classList.remove('hidden');
-            }
         });
     }
 
@@ -901,8 +816,9 @@ export const setupUserPanelLogic = (panelElement, userRole) => {
         const menuItems = [
             { id: 'modules', title: 'Módulos', sectionId: 'modules-section' },
             { id: 'WRITING', title: 'Práctica de Escritura', sectionId: 'unit-WRITING' },
+            { id: 'LISTENING', title: 'Práctica de Escucha', sectionId: 'unit-LISTENING' },
             { id: 'EXAM1', title: 'EXAMEN FINAL 1', sectionId: 'unit-EXAM1' },
-            { id: 'EXAM2', title: 'EXAMEN FINAL 2', sectionId: 'unit-EXAM2' },
+            { id: 'EXAM2', title: 'SECOND TERM EXAMEN', sectionId: 'unit-EXAM2' },
             { id: 'grades', title: 'Calificaciones', sectionId: 'grades-section' }
         ];
 
